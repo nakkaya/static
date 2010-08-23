@@ -86,15 +86,22 @@
 
 ;;(create "resources/" "html/" "UTF-8")
 
-(defn mirror-folders-sftp [out-dir deploy-dir]
+(defn mirror-folders-sftp [channel out-dir deploy-dir]
   (let [file (File. out-dir)
 	seq (file-seq file)
 	folders (filter #(and (not (.isFile %)) 
 			      (not (.equals % file))) seq)]
-    (cons deploy-dir 
-	  (map #(-> (str %) (.replaceAll out-dir deploy-dir)) folders))))
+    (try (.mkdir channel deploy-dir) (catch Exception _))
+    (doseq [fd folders]
+      (try 
+       (.mkdir channel (-> (str fd) (.replaceAll out-dir deploy-dir))) 
+       (catch Exception _)))))
 
-;;(mirror-folders-sftp "html/" "./top/")
+(defn put-files [ch out-dir deploy-dir]
+  (doseq [f (filter #(.isFile %) (file-seq (File. out-dir)))]
+    (info (str "Sending " f))
+    (sftp ch :put (str f) (-> (str f) (.replaceAll out-dir deploy-dir))))
+  (info "Transfer Done."))
 
 (defn deploy [out-dir host port user deploy-dir]
   (with-ssh-agent []
@@ -103,17 +110,11 @@
       (with-connection session
   	(let [channel (ssh-sftp session)]
   	  (with-connection channel
-  	    ;;create dir structure
-  	    (doseq [fd (mirror-folders-sftp out-dir deploy-dir)]
-  	      (try (.mkdir channel fd) (catch Exception _)))
-  	    ;;deploy files
-  	    (doseq [f (filter #(.isFile %) (file-seq (File. out-dir)))]
-  	      (println f "->" (-> (str f) (.replaceAll out-dir deploy-dir)))
-  	      (sftp channel :put 
-  		    (str f) 
-  		    (-> (str f) (.replaceAll out-dir deploy-dir))))))))))
+	    (mirror-folders-sftp channel out-dir deploy-dir)
+	    (put-files channel out-dir deploy-dir)))))))
 
 (defn -main [& args]
+  (set-log-format)
   (with-command-line args
     "Static"
     [[in-dir       "Resources Directory" "resources/"]

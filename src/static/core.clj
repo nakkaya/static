@@ -3,12 +3,11 @@
   (:use clojure.contrib.logging)
   (:use clojure.contrib.command-line)
   (:use clojure.java.io)
-  (:use clj-ssh.ssh)
   (:use hiccup.core)
-  (:use static.sftp)
+  (:use static.sftp :reload-all)
+  (:use static.markdown :reload-all)
   (:use [clojure.contrib.io :only [delete-file-recursively]])
-  (:import (java.io File)
-  	   (com.petebevin.markdown MarkdownProcessor)))
+  (:import (java.io File)))
 
 (defn set-log-format []
   (let [logger (impl-get-log "")]
@@ -18,22 +17,6 @@
 	   (format 
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
-
-(defn markdown [txt] (.markdown (MarkdownProcessor.) txt))
-
-(defn split-file [content]
-  (let [idx (.indexOf content "---" 4)] 
-    [(.substring content 4 idx) (.substring content (+ 3 idx))]))
-
-(defn prepare-metadata [metadata]
-  (reduce (fn [h [_ k v]] 
-	    (let [key (keyword k)]
-	      (assoc h key v)))
-	  {} (re-seq #"([^:]+): (.+)(\n|$)" metadata)))
-
-(defn read-markdown [file]
-  (let [[metadata content] (split-file (slurp file))]
-    [(prepare-metadata metadata) (markdown content)]))
 
 (defn mirror-folders [in-dir out-dir]
   (let [file (File. in-dir)

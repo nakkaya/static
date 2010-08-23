@@ -4,9 +4,9 @@
 	[clojure.contrib.with-ns]
 	[clojure.contrib.command-line]
 	[clojure.contrib.logging])
-  (:use clojure.java.io)
   (:use static.sftp :reload-all)
-  (:import (java.io File)))
+  (:import (java.io File)
+	   (org.apache.commons.io FileUtils FilenameUtils)))
 
 (defn set-log-format []
   (let [logger (impl-get-log "")]
@@ -17,17 +17,6 @@
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
-(defn mirror-folders [in-dir out-dir]
-  (let [file (File. in-dir)
-	seq (file-seq file)
-	folders (filter #(and (not (.isFile %)) 
-			      (not (.equals % file))) seq)]
-    (doseq [f folders]
-      (-> (str f)
-    	  (.replaceAll in-dir out-dir)
-    	  (File.)
-    	  (.mkdir)))))
-
 (defn template [f in-dir encoding]
   ;;get rid of this!!
   (def *f* f)
@@ -36,38 +25,35 @@
   (with-temp-ns
     (use 'static.markdown)
     (use 'hiccup.core)
-    (use 'clojure.java.io)
+    (import java.io.File)
     (let [[m c] (read-markdown static.core/*f*)
 	  template (str static.core/*in-dir* "templates/" (:template m))]
       (def metadata m)
       (def content c)
       (-> template 
-	  file 
+	  (File.) 
 	  (slurp :encoding static.core/*encoding*) 
 	  read-string 
 	  eval
 	  html))))
 
 (defn process-site [in-dir out-dir encoding]
-  (let [files (filter #(.isFile %) (file-seq (File. (str in-dir "site/"))))]
-
-    (mirror-folders (str in-dir "site/") out-dir)
-
-    (doseq [f files]
-      (spit (-> (str f)
-		(.replaceAll (str in-dir "site/") out-dir)
-		(.replaceAll ".markdown" ".html")
-		(File.)) 
-	    (template f in-dir encoding) :encoding encoding))))
+  (doseq [f (FileUtils/listFiles (File. (str in-dir "site/")) nil true)]
+    (FileUtils/writeStringToFile 
+     (-> (str f)
+	 (.replaceAll (str in-dir "site/") out-dir)
+	 (FilenameUtils/removeExtension)
+	 (str ".html")
+	 (File.)) 
+     (template f in-dir encoding) encoding)))
 
 (defn process-public [in-dir out-dir]
-  (let [files (filter #(.isFile %) 
-		      (file-seq (File. (str in-dir "public/")))) ] 
-    (mirror-folders (str in-dir "public/") out-dir)
-    (doseq [f files]
-      (copy f (-> (str f)
-		  (.replaceAll (str in-dir "public/") out-dir)
-		  (File.))))))
+  (let [in-dir (File. (str in-dir "public/"))
+	out-dir (File. out-dir)]
+    (doseq [f (map #(File. in-dir %) (.list in-dir))]
+      (if (.isFile f)
+	(FileUtils/copyFileToDirectory f out-dir)
+	(FileUtils/copyDirectoryToDirectory f out-dir)))))
 
 (defn create [in-dir out-dir encoding] 
   (doto (File. out-dir)

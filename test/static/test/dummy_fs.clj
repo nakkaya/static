@@ -6,11 +6,12 @@
   (.mkdir (File. "resources/"))
   (.mkdir (File. "resources/site/"))
   (.mkdir (File. "resources/public/"))
+  (.mkdir (File. "resources/posts/"))
   (.mkdir (File. "resources/templates/")))
 
 (defn- create-site []
   (spit (File. "resources/site/dummy.markdown")
-    "---
+	"---
 title: dummy content
 description: some dummy desc
 tags: unit test
@@ -18,6 +19,47 @@ template: temp.clj
 ---
 
 Some dummy file for unit testing."))
+
+(defn- create-dummy-posts []
+  (spit 
+   (File. "resources/posts/2050-01-01-dummy-future-post-1.markdown")
+   "---
+title: dummy future post 1
+tags: 4673 9c0e
+template: temp.clj
+---
+
+text dummy post 1")
+
+  (spit 
+   (File. "resources/posts/2050-02-02-dummy-future-post-2.markdown")
+   "---
+title: dummy future post 2
+tags: e8edaab7 25e9
+template: temp.clj
+---
+
+text dummy post 2")
+
+  (spit 
+   (File. "resources/posts/2050-03-03-dummy-future-post-3.markdown")
+   "---
+title: dummy future post 3
+tags: 45f5 8a0c
+template: temp.clj
+---
+
+text dummy post 3")
+
+  (spit 
+   (File. "resources/posts/2050-04-04-dummy-future-post-4.markdown")
+   "---
+title: dummy future post 4
+tags: 4784d643 e4e8
+template: temp.clj
+---
+
+text dummy post 4"))
 
 (defn- create-template []
   (spit (File. "resources/templates/temp.clj") "content"))
@@ -29,4 +71,5 @@ Some dummy file for unit testing."))
   (create-resources)
   (create-site)
   (create-static-file)
+  (create-dummy-posts)
   (create-template))

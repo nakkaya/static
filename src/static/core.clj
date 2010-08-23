@@ -126,4 +126,4 @@
      [user         "SSH Username"]]
     (if-not deploy?
       (create in-dir out-dir encoding)
-      (deploy out-dir host port user deploy-dir))))
+      (deploy out-dir host (int port) user deploy-dir))))

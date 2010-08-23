@@ -99,19 +99,19 @@
 (defn deploy [out-dir host port user deploy-dir]
   (with-ssh-agent []
     (let [session (session host :strict-host-key-checking :no
-			   :port port :username user)]
+  			   :port port :username user)]
       (with-connection session
-	(let [channel (ssh-sftp session)]
-	  (with-connection channel
-	    ;;create dir structure
-	    (doseq [fd (mirror-folders-sftp out-dir deploy-dir)]
-	      (try (.mkdir channel fd) (catch Exception _)))
-	    ;;deploy files
-	    (doseq [f (filter #(.isFile %) (file-seq (File. out-dir)))]
-	      (println f "->" (-> (str f) (.replaceAll out-dir deploy-dir)))
-	      (sftp channel :put 
-		    (str f) 
-		    (-> (str f) (.replaceAll out-dir deploy-dir))))))))))
+  	(let [channel (ssh-sftp session)]
+  	  (with-connection channel
+  	    ;;create dir structure
+  	    (doseq [fd (mirror-folders-sftp out-dir deploy-dir)]
+  	      (try (.mkdir channel fd) (catch Exception _)))
+  	    ;;deploy files
+  	    (doseq [f (filter #(.isFile %) (file-seq (File. out-dir)))]
+  	      (println f "->" (-> (str f) (.replaceAll out-dir deploy-dir)))
+  	      (sftp channel :put 
+  		    (str f) 
+  		    (-> (str f) (.replaceAll out-dir deploy-dir))))))))))
 
 (defn -main [& args]
   (with-command-line args
@@ -126,4 +126,4 @@
      [user         "SSH Username"]]
     (if-not deploy?
       (create in-dir out-dir encoding)
-      (deploy out-dir host (int port) user deploy-dir))))
+      (deploy out-dir host (read-string port) user deploy-dir))))

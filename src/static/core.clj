@@ -1,12 +1,11 @@
 (ns static.core
   (:gen-class)
-  (:use clojure.contrib.logging)
-  (:use clojure.contrib.command-line)
+  (:use [clojure.contrib.io :only [delete-file-recursively]]
+	[clojure.contrib.with-ns]
+	[clojure.contrib.command-line]
+	[clojure.contrib.logging])
   (:use clojure.java.io)
-  (:use hiccup.core)
   (:use static.sftp :reload-all)
-  (:use static.markdown :reload-all)
-  (:use [clojure.contrib.io :only [delete-file-recursively]])
   (:import (java.io File)))
 
 (defn set-log-format []
@@ -29,7 +28,25 @@
     	  (File.)
     	  (.mkdir)))))
 
-;;(mirror-folders "resources/public/" "html/")
+(defn template [f in-dir encoding]
+  ;;get rid of this!!
+  (def *f* f)
+  (def *in-dir* in-dir)
+  (def *encoding* encoding)
+  (with-temp-ns
+    (use 'static.markdown)
+    (use 'hiccup.core)
+    (use 'clojure.java.io)
+    (let [[m c] (read-markdown static.core/*f*)
+	  template (str static.core/*in-dir* "templates/" (:template m))]
+      (def metadata m)
+      (def content c)
+      (-> template 
+	  file 
+	  (slurp :encoding static.core/*encoding*) 
+	  read-string 
+	  eval
+	  html))))
 
 (defn process-site [in-dir out-dir encoding]
   (let [files (filter #(.isFile %) (file-seq (File. (str in-dir "site/"))))]
@@ -37,20 +54,11 @@
     (mirror-folders (str in-dir "site/") out-dir)
 
     (doseq [f files]
-      (let [[metadata content] (read-markdown f)
-    	    template (-> (str (str in-dir "templates/") (:template metadata))
-    	    		 file
-    	    		 (slurp :encoding encoding)
-    	    		 read-string
-    	    		 html
-    	    		 (.replaceAll "\\$content\\$" content))]
-    	(spit (-> (str f)
-    		  (.replaceAll (str in-dir "site/") out-dir)
-    		  (.replaceAll ".markdown" ".html")
-    		  (File.)) 
-    	      template :encoding encoding)))))
-
-;;(process-site "resources/" "html/" "UTF-8")
+      (spit (-> (str f)
+		(.replaceAll (str in-dir "site/") out-dir)
+		(.replaceAll ".markdown" ".html")
+		(File.)) 
+	    (template f in-dir encoding) :encoding encoding))))
 
 (defn process-public [in-dir out-dir]
   (let [files (filter #(.isFile %) 
@@ -67,8 +75,6 @@
     (.mkdir))
   (process-site in-dir out-dir encoding)
   (process-public in-dir out-dir))
-
-;;(create "resources/" "html/" "UTF-8")
 
 (defn -main [& args]
   (set-log-format)

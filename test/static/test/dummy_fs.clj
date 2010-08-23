@@ -20,7 +20,7 @@ template: temp.clj
 Some dummy file for unit testing."))
 
 (defn- create-template []
-  (spit (File. "resources/templates/temp.clj") " $content$ "))
+  (spit (File. "resources/templates/temp.clj") "content"))
 
 (defn- create-static-file []
   (spit (File. "resources/public/dummy.static") "Hello, World!!"))

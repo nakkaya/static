@@ -1,11 +1,22 @@
 (ns static.core
   (:gen-class)
+  (:use clojure.contrib.logging)
   (:use clojure.contrib.command-line)
   (:use clojure.java.io)
+  (:use clj-ssh.ssh)
   (:use hiccup.core)
   (:use [clojure.contrib.io :only [delete-file-recursively]])
-  (:import (java.io File)
+  (:import (java.io File FileInputStream)
   	   (com.petebevin.markdown MarkdownProcessor)))
+
+(defn set-log-format []
+  (let [logger (impl-get-log "")]
+    (doseq [handler (.getHandlers logger)]
+      (. handler setFormatter 
+	 (proxy [java.util.logging.Formatter] [] 
+	   (format 
+	    [record] 
+	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
 (defn markdown [txt] (.markdown (MarkdownProcessor.) txt))
 
@@ -75,10 +86,44 @@
 
 ;;(create "resources/" "html/" "UTF-8")
 
+(defn mirror-folders-sftp [out-dir deploy-dir]
+  (let [file (File. out-dir)
+	seq (file-seq file)
+	folders (filter #(and (not (.isFile %)) 
+			      (not (.equals % file))) seq)]
+    (cons deploy-dir 
+	  (map #(-> (str %) (.replaceAll out-dir deploy-dir)) folders))))
+
+;;(mirror-folders-sftp "html/" "./top/")
+
+(defn deploy [out-dir host port user deploy-dir]
+  (with-ssh-agent []
+    (let [session (session host :strict-host-key-checking :no
+			   :port port :username user)]
+      (with-connection session
+	(let [channel (ssh-sftp session)]
+	  (with-connection channel
+	    ;;create dir structure
+	    (doseq [fd (mirror-folders-sftp out-dir deploy-dir)]
+	      (try (.mkdir channel fd) (catch Exception _)))
+	    ;;deploy files
+	    (doseq [f (filter #(.isFile %) (file-seq (File. out-dir)))]
+	      (println f "->" (-> (str f) (.replaceAll out-dir deploy-dir)))
+	      (sftp channel :put 
+		    (str f) 
+		    (-> (str f) (.replaceAll out-dir deploy-dir))))))))))
+
 (defn -main [& args]
   (with-command-line args
     "Static"
     [[in-dir       "Resources Directory" "resources/"]
      [out-dir      "Html Output Directory" "html/"]
-     [encoding     "Default Encoding for Files" "UTF-8"]]
-    (create in-dir out-dir encoding)))
+     [encoding     "Default Encoding for Files" "UTF-8"]
+     [deploy? d?   "Deploy over SSH."]
+     [deploy-dir   "Remote Directory to Deploy"]
+     [host         "Remote Host to Deploy"]
+     [port         "SSH Port"]
+     [user         "SSH Username"]]
+    (if-not deploy?
+      (create in-dir out-dir encoding)
+      (deploy out-dir host port user deploy-dir))))

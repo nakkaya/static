@@ -24,6 +24,20 @@
     (is (= "Some dummy file for unit testing."
 	   (re-find #"Some dummy file for unit testing." content)))))
 
+(deftest test-rss-feed
+  (let [rss (File. "html/rss-feed")
+	content (slurp rss)] 
+    (is (= true (.exists rss)))
+    (is (= "<title>Dummy Site</title>"
+    	   (re-find #"<title>Dummy Site</title>" content)))
+    (is (= "<link>http://www.dummy.com</link>"
+    	   (re-find #"<link>http://www.dummy.com</link>" content)))
+    (is (= "<title>dummy future post 1</title>"
+    	   (re-find #"<title>dummy future post 1</title>" content)))
+    (is (= "http://www.dummy.com/2050/04/04/dummy-future-post-4/"
+	   (re-find #"http://www.dummy.com/2050/04/04/dummy-future-post-4/" 
+		    content)))))
+
 (deftest test-process-site
   (let [html (File. "html/dummy.html")
 	static (File. "html/dummy.static")] 

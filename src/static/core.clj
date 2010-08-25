@@ -20,6 +20,10 @@
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
+(defn post-file-url [file]
+  (let [name (FilenameUtils/getBaseName (str file))]
+    (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
+
 (def config
      (memoize
       #(try 
@@ -65,6 +69,32 @@
 	 (File.)) 
      (template f) (:encoding (config)))))
 
+(defn post-xml
+  "Create RSS item node."
+  [file]
+  (let [[metadata content] (read-markdown file)]
+    [:item 
+     [:title (:title metadata)]
+     [:link  (str (URL. (URL. (:site-url (config))) (post-file-url file)))]
+     [:description content]]))
+
+(defn create-rss 
+  "Create RSS feed."
+  []
+  (let [in-dir (File. (dir :posts))
+	posts (take 10 (map #(File. in-dir %) (.list in-dir)))]
+    (FileUtils/writeStringToFile
+     (File. (:out-dir (config)) "rss-feed")
+     (with-out-str
+       (prxml [:decl! {:version "1.0"}] 
+	      [:rss {:version "2.0"} 
+	       [:channel 
+		[:title (:site-title (config))]
+		[:link (:site-url (config))]
+		[:description (:site-description (config))]
+		(map post-xml posts)]]))
+     (:encoding (config)))))
+
 (defn process-public []
   (let [in-dir (File. (dir :public))
 	out-dir (File. (:out-dir (config)))]
@@ -78,7 +108,9 @@
     (delete-file-recursively true)
     (.mkdir))
   (process-site)
-  (process-public))
+  (process-public)
+  (if (pos? (-> (dir :posts) (File.) .list count))
+    (create-rss)))
 
 (defn -main [& args]
   (set-log-format)

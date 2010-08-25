@@ -8,10 +8,11 @@
 
 (defn dummy-fs-fixture [f]
   (create-dummy-fs)
-  (create "resources/" "html/" "UTF-8")
+  (create)
   (f)
   (delete-file-recursively (File. "resources/") true)
-  (delete-file-recursively (File. "html/") true))
+  (delete-file-recursively (File. "html/") true)
+  (delete-file-recursively (File. "config.clj") true))
 
 (use-fixtures :once dummy-fs-fixture)
 

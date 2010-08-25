@@ -3,9 +3,12 @@
   (:use [clojure.contrib.io :only [delete-file-recursively]]
 	[clojure.contrib.with-ns]
 	[clojure.contrib.command-line]
-	[clojure.contrib.logging])
+	[clojure.contrib.logging]
+	[clojure.contrib.prxml])
+  (:use static.markdown :reload-all)
   (:use static.sftp :reload-all)
   (:import (java.io File)
+	   (java.net URL)
 	   (org.apache.commons.io FileUtils FilenameUtils)))
 
 (defn set-log-format []
@@ -17,63 +20,76 @@
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
-(defn template [f in-dir encoding]
+(def config
+     (memoize
+      #(try 
+	(apply hash-map (read-string (slurp (File. "config.clj"))))
+	(catch Exception e (do 
+			     (info "Configuration not found using defaults.")
+			     {:in-dir "resources/"
+			      :out-dir "html/"
+			      :encoding "UTF-8"})))))
+
+(defn dir [dir]
+  (cond (= dir :templates) (str (:in-dir (config)) "templates/")
+	(= dir :public) (str (:in-dir (config)) "public/")
+	(= dir :site) (str (:in-dir (config)) "site/")
+	(= dir :posts) (str (:in-dir (config)) "posts/")
+	:default (throw (Exception. "Unknown Directory."))))
+
+(defn template [f]
   ;;get rid of this!!
   (def *f* f)
-  (def *in-dir* in-dir)
-  (def *encoding* encoding)
   (with-temp-ns
     (use 'static.markdown)
     (use 'hiccup.core)
     (import java.io.File)
     (let [[m c] (read-markdown static.core/*f*)
-	  template (str static.core/*in-dir* "templates/" (:template m))]
+	  template (str  (static.core/dir :templates) (:template m))]
       (def metadata m)
       (def content c)
       (-> template 
 	  (File.) 
-	  (slurp :encoding static.core/*encoding*) 
+	  (slurp :encoding (:encoding (static.core/config))) 
 	  read-string 
 	  eval
 	  html))))
 
-(defn process-site [in-dir out-dir encoding]
-  (doseq [f (FileUtils/listFiles (File. (str in-dir "site/")) nil true)]
+(defn process-site []
+  (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
     (FileUtils/writeStringToFile 
      (-> (str f)
-	 (.replaceAll (str in-dir "site/") out-dir)
+	 (.replaceAll (dir :site) (:out-dir (config)))
 	 (FilenameUtils/removeExtension)
 	 (str ".html")
 	 (File.)) 
-     (template f in-dir encoding) encoding)))
+     (template f) (:encoding (config)))))
 
-(defn process-public [in-dir out-dir]
-  (let [in-dir (File. (str in-dir "public/"))
-	out-dir (File. out-dir)]
+(defn process-public []
+  (let [in-dir (File. (dir :public))
+	out-dir (File. (:out-dir (config)))]
     (doseq [f (map #(File. in-dir %) (.list in-dir))]
       (if (.isFile f)
 	(FileUtils/copyFileToDirectory f out-dir)
 	(FileUtils/copyDirectoryToDirectory f out-dir)))))
 
-(defn create [in-dir out-dir encoding] 
-  (doto (File. out-dir)
+(defn create [] 
+  (doto (File. (:out-dir (config)))
     (delete-file-recursively true)
     (.mkdir))
-  (process-site in-dir out-dir encoding)
-  (process-public in-dir out-dir))
+  (process-site)
+  (process-public))
 
 (defn -main [& args]
   (set-log-format)
   (with-command-line args
     "Static"
-    [[in-dir       "Resources Directory" "resources/"]
-     [out-dir      "Html Output Directory" "html/"]
-     [encoding     "Default Encoding for Files" "UTF-8"]
-     [deploy? d?   "Deploy over SSH."]
-     [deploy-dir   "Remote Directory to Deploy"]
-     [host         "Remote Host to Deploy"]
-     [port         "SSH Port"]
-     [user         "SSH Username"]]
-    (if-not deploy?
-      (create in-dir out-dir encoding)
-      (deploy out-dir host (read-string port) user deploy-dir))))
+    [[build? b?   "Build Site."]
+     [deploy? d?   "Deploy over SSH."]]
+    (cond build? (create)
+	  deploy? (deploy (:out-dir (config)) 
+			  (:host (config)) 
+			  (:port (config))
+			  (:user (config))
+			  (:deploy-dir (config)))
+	  :default (println "Use -h for options."))))

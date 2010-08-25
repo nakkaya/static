@@ -67,9 +67,20 @@ text dummy post 4"))
 (defn- create-static-file []
   (spit (File. "resources/public/dummy.static") "Hello, World!!"))
 
+(defn- create-config []
+  (spit (File. "config.clj") 
+	"
+[:site-title \"Dummy Site\"
+ :site-description \"Dummy Description\"
+ :site-url \"http://www.dummy.com\"
+ :in-dir \"resources/\"
+ :out-dir \"html/\"
+ :encoding \"UTF-8\"]"))
+
 (defn create-dummy-fs []
   (create-resources)
   (create-site)
   (create-static-file)
   (create-dummy-posts)
-  (create-template))
+  (create-template)
+  (create-config))

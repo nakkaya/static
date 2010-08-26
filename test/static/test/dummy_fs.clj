@@ -77,7 +77,8 @@ text dummy post 4"))
  :out-dir \"html/\"
  :default-template \"temp.clj\"
  :encoding \"UTF-8\"
- :posts-per-page 2]"))
+ :posts-per-page 2
+ :blog-as-index true]"))
 
 (defn create-dummy-fs []
   (create-resources)

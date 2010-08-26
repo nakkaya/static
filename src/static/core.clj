@@ -233,7 +233,12 @@
       (create-rss)
       (create-tags)
       (create-latest-posts)
-      (create-archives))))
+      (create-archives)
+      (when (:blog-as-index (config))
+	(FileUtils/moveFile 
+	 (File. (str (:out-dir (config)) 
+		     "latest-posts/0/index.html")) 
+	 (File. (str (:out-dir (config)) "index.html")))))))
 
 (defn -main [& args]
   (set-log-format)

@@ -79,13 +79,15 @@
 
 (defn process-site []
   (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
-    (FileUtils/writeStringToFile 
-     (-> (str f)
-	 (.replaceAll (dir :site) (:out-dir (config)))
-	 (FilenameUtils/removeExtension)
-	 (str ".html")
-	 (File.)) 
-     (template f) (:encoding (config)))))
+    (let [[metadata content] (read-markdown f)] 
+      (FileUtils/writeStringToFile 
+       (-> (str f)
+	   (.replaceAll (dir :site) (:out-dir (config)))
+	   (FilenameUtils/removeExtension)
+	   (str ".html")
+	   (File.)) 
+       (template [(assoc metadata :type :site) content]) 
+       (:encoding (config))))))
 
 (defn post-xml
   "Create RSS item node."
@@ -156,7 +158,7 @@
   "Render a post for display in index pages."
   [f]
   (let [[metadata content] (read-markdown (str (dir :posts) f))]
-    [:div [:h2 [:a {:href (post-file-url f)} (:title meta)]]
+    [:div [:h2 [:a {:href (post-file-url f)} (:title metadata)]]
      [:p {:class "publish_date"}  
       (parse-date "yyyy-MM-dd" "dd MMM yyyy" (re-find #"\d*-\d*-\d*" f))]
      [:p content]]))
@@ -212,7 +214,8 @@
 				  (interleave  (repeat \/))))]
       (FileUtils/writeStringToFile 
        (File. (str (:out-dir (config)) out-file "index.html"))
-       (template [(assoc metadata :type :post) content])
+       (template [(assoc metadata :type :post
+			 :url (post-file-url f)) content])
        (:encoding (config))))))
 
 (defn process-public []

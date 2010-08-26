@@ -168,14 +168,13 @@
 			    (reverse posts) 
 			    (concat (range (dec (count posts))) [-1])))]
     (doseq [[posts page] pages]
-      (doseq [post posts]
-    	(FileUtils/writeStringToFile
-    	 (File. (:out-dir (config)) (str "latest-posts/" page "/index.html"))
-    	 (template
-	  [{:title (:site-title (config))
-	    :template (:default-template (config))}
-	   (html (list (snippet post) (pager page)))])
-    	 (:encoding (config)))))))
+      (FileUtils/writeStringToFile
+       (File. (:out-dir (config)) (str "latest-posts/" page "/index.html"))
+       (template
+	[{:title (:site-title (config))
+	  :template (:default-template (config))}
+	 (html (list (map #(snippet %) posts) (pager page)))])
+       (:encoding (config))))))
 
 (defn create-archives []
   (FileUtils/writeStringToFile

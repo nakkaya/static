@@ -128,19 +128,22 @@
 	    (if (nil? (m tag))
 	      (assoc m tag [info])
 	      (assoc m tag (conj (m tag) info)))))
-	    h (partition 2 (interleave tags (repeat info))))))
-   {} (.list (File. (dir :posts)))))
+	h (partition 2 (interleave tags (repeat info))))))
+   (sorted-map) (.list (File. (dir :posts)))))
 
 (defn create-tags []
   (FileUtils/writeStringToFile
    (File. (:out-dir (config)) "tags/index.html")
-   (html
-    (map (fn[t]
-	   (let [[tag posts] t] 
-	     [:h4 [:a {:name tag} tag]
-	      (map #(let [[url title] %]
-		      [:li [:a {:href url} title]]) posts)]))
-	 (tag-map)))
+   (template
+    [{:title "Tags" :template (:default-template (config))}
+     (html
+      (map (fn[t]
+	     (let [[tag posts] t] 
+	       [:h4 [:a {:name tag} tag]
+		[:ul
+		 (map #(let [[url title] %]
+			 [:li [:a {:href url} title]]) posts)]]))
+	   (tag-map)))])
    (:encoding (config))))
 
 (defn pager [page max-index]

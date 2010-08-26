@@ -141,15 +141,15 @@
 	 (tag-map)))
    (:encoding (config))))
 
-(defn pager [page]
+(defn pager [page max-index]
   (let [older [:div {:class "pager-left"}
 	       [:a {:href (str "/latest-posts/" (- page 1) "/")} 
 		"&laquo; Older Entries"]]
 	newer [:div {:class "pager-right"}
 	       [:a {:href (str "/latest-posts/" (+ page 1) "/")} 
 		"Newer Entries &raquo;"]]]
-    (cond (= page 0) (list older)
-	  (= page -1) (list newer)
+    (cond (= page max-index) (list older)
+	  (= page 0) (list newer)
 	  :default (list older newer))))
 
 (defn snippet
@@ -164,16 +164,15 @@
 (defn create-latest-posts []
   (let [posts (partition (:posts-per-page (config))
 			 (reverse (.list (File. (dir :posts)))))
-	pages (partition 2 (interleave 
-			    (reverse posts) 
-			    (concat (range (dec (count posts))) [-1])))]
+	pages (partition 2 (interleave (reverse posts) (range)))
+	[_ max-index] (last pages)]
     (doseq [[posts page] pages]
       (FileUtils/writeStringToFile
        (File. (:out-dir (config)) (str "latest-posts/" page "/index.html"))
        (template
-	[{:title (:site-title (config))
-	  :template (:default-template (config))}
-	 (html (list (map #(snippet %) posts) (pager page)))])
+    	[{:title (:site-title (config))
+    	  :template (:default-template (config))}
+    	 (html (list (map #(snippet %) posts) (pager page max-index)))])
        (:encoding (config))))))
 
 (defn create-archives []
@@ -237,10 +236,14 @@
       (create-latest-posts)
       (create-archives)
       (when (:blog-as-index (config))
-	(FileUtils/copyFile 
-	 (File. (str (:out-dir (config)) 
-		     "latest-posts/-1/index.html")) 
-	 (File. (str (:out-dir (config)) "index.html")))))))
+	(let [max (apply max (map read-string (-> (:out-dir (config))
+						  (str  "latest-posts/")
+						  (File.)
+						  .list)))]
+	  (FileUtils/copyFile 
+	   (File. (str (:out-dir (config)) 
+		       "latest-posts/" max "/index.html")) 
+	   (File. (str (:out-dir (config)) "index.html"))))))))
 
 (defn -main [& args]
   (set-log-format)

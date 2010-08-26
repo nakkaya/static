@@ -58,6 +58,12 @@
     	   (re-find #"<a href=\"/2050/03/03/dummy-future-post-3/\">"
     		    (slurp page-1))))))
 
+(deftest test-archives
+  (let [index (File. "html/archives/index.html")
+	a-2050-01 (File. "html/archives/2050/01/index.html")] 
+    (is (= true (.exists index)))
+    (is (= true (.exists a-2050-01)))))
+
 (deftest test-process-site
   (let [html (File. "html/dummy.html")
 	static (File. "html/dummy.static")] 

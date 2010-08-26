@@ -22,15 +22,8 @@
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
-(defn post-file-url [file]
-  (let [name (FilenameUtils/getBaseName (str file))]
-    (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
-
-(defn post-date [file]
-  (let  [parse-format (SimpleDateFormat. "yyyy-MM-dd")
-	 date (.parse parse-format (re-find #"\d*-\d*-\d*" file)) 
-	 print-format (SimpleDateFormat. "dd MMM yyyy")]
-    (.format print-format date)))
+(defn parse-date [in out date]
+  (.format (SimpleDateFormat. out) (.parse (SimpleDateFormat. in) date)))
 
 (def config
      (memoize
@@ -48,6 +41,18 @@
 	(= dir :site) (str (:in-dir (config)) "site/")
 	(= dir :posts) (str (:in-dir (config)) "posts/")
 	:default (throw (Exception. "Unknown Directory."))))
+
+(defn post-file-url [file]
+  (let [name (FilenameUtils/getBaseName (str file))]
+    (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
+
+(defn post-count-by-mount []
+  (reduce (fn [h v]
+	    (let  [date (re-find #"\d*-\d*" v)]
+	      (if (nil? (h date))
+		(assoc h date 1)
+		(assoc h date (+ 1 (h date)))))) 
+	  {} (.list (File. (dir :posts)))))
 
 (defn template [f]
   ;;get rid of this!!
@@ -149,7 +154,8 @@
   [f]
   (let [[metadata content] (read-markdown (str (dir :posts) f))]
     [:div [:h2 [:a {:href (post-file-url f)} (:title meta)]]
-     [:p {:class "publish_date"}  (post-date f)]
+     [:p {:class "publish_date"}  
+      (parse-date "yyyy-MM-dd" "dd MMM yyyy" (re-find #"\d*-\d*-\d*" f))]
      [:p content]]))
 
 (defn create-latest-posts []
@@ -167,6 +173,35 @@
 	    :template (:default-template (config))}
 	   (html (list (snippet post) (pager page)))])
     	 (:encoding (config)))))))
+
+(defn create-archives []
+  (FileUtils/writeStringToFile
+   (File. (:out-dir (config)) (str "archives/index.html"))
+   (template
+    [{:title "Archives" :template (:default-template (config))}
+     (html 
+      (list [:h2 "Archives"]
+	    [:ul 
+	     (map 
+	      #(let [url (str "/archives/" (.replace (first %) "-" "/") "/")
+		     date (parse-date "yyyy-MM" "MMMM yyyy" (first %))
+		     count (str " (" (second %) ")")]
+		 [:li [:a {:href url} date] count]) 
+	      (post-count-by-mount))]))])
+   (:encoding (config)))
+  ;;create a page for each month
+  (doseq [month (keys (post-count-by-mount))] 
+    (let [posts (filter #(.startsWith % month) 
+			(.list (File. (dir :posts))))]
+      (FileUtils/writeStringToFile
+       (File. (:out-dir (config)) (str "archives/" 
+				       (.replace month "-" "/") 
+				       "/index.html"))
+       (template
+	[{:title "Archives" :template (:default-template (config))}
+	 (html 
+	  (map snippet posts))])
+       (:encoding (config))))))
 
 (defn process-public []
   (let [in-dir (File. (dir :public))
@@ -186,7 +221,8 @@
     (do 
       (create-rss)
       (create-tags)
-      (create-latest-posts))))
+      (create-latest-posts)
+      (create-archives))))
 
 (defn -main [& args]
   (set-log-format)

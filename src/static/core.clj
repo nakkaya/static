@@ -240,7 +240,7 @@
       (when (:blog-as-index (config))
 	(FileUtils/moveFile 
 	 (File. (str (:out-dir (config)) 
-		     "latest-posts/0/index.html")) 
+		     "latest-posts/-1/index.html")) 
 	 (File. (str (:out-dir (config)) "index.html")))))))
 
 (defn -main [& args]

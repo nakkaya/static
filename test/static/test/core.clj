@@ -50,11 +50,8 @@
 		    content)))))
 
 (deftest test-latest-posts
-  (let [page (File. "html/latest-posts/-1/index.html")] 
-    (is (= true (.exists page)))
-    (is (= "<a href=\"/2050/03/03/dummy-future-post-3/\">"
-    	   (re-find #"<a href=\"/2050/03/03/dummy-future-post-3/\">"
-    		    (slurp page))))))
+  (let [page (File. "html/latest-posts/0/index.html")] 
+    (is (= true (.exists page)))))
 
 (deftest test-archives
   (let [index (File. "html/archives/index.html")

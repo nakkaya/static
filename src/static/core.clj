@@ -42,7 +42,7 @@
 	(= dir :posts) (str (:in-dir (config)) "posts/")
 	:default (throw (Exception. "Unknown Directory."))))
 
-(defn post-file-url [file]
+(defn post-url [file]
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
 
@@ -95,7 +95,7 @@
   (let [[metadata content] (read-markdown file)]
     [:item 
      [:title (:title metadata)]
-     [:link  (str (URL. (URL. (:site-url (config))) (post-file-url file)))]
+     [:link  (str (URL. (URL. (:site-url (config))) (post-url file)))]
      [:description content]]))
 
 (defn create-rss 
@@ -120,7 +120,7 @@
    (fn[h v] 
      (let [post (File. (str (dir :posts) v))
 	   [metadata _] (read-markdown post)
-	   info [(post-file-url v) (:title metadata)]
+	   info [(post-url v) (:title metadata)]
 	   tags (.split (:tags metadata) " ")]
        (reduce 
 	(fn[m p] 
@@ -161,7 +161,7 @@
   "Render a post for display in index pages."
   [f]
   (let [[metadata content] (read-markdown (str (dir :posts) f))]
-    [:div [:h2 [:a {:href (post-file-url f)} (:title metadata)]]
+    [:div [:h2 [:a {:href (post-url f)} (:title metadata)]]
      [:p {:class "publish_date"}  
       (parse-date "yyyy-MM-dd" "dd MMM yyyy" (re-find #"\d*-\d*-\d*" f))]
      [:p content]]))
@@ -218,7 +218,7 @@
       (FileUtils/writeStringToFile 
        (File. (str (:out-dir (config)) out-file "index.html"))
        (template [(assoc metadata :type :post
-			 :url (post-file-url f)) content])
+			 :url (post-url f)) content])
        (:encoding (config))))))
 
 (defn process-public []

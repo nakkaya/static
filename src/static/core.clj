@@ -10,7 +10,8 @@
   (:use static.sftp :reload-all)
   (:import (java.io File)
 	   (java.net URL)
-	   (org.apache.commons.io FileUtils FilenameUtils)))
+	   (org.apache.commons.io FileUtils FilenameUtils)
+	   (java.text SimpleDateFormat)))
 
 (defn set-log-format []
   (let [logger (impl-get-log "")]
@@ -24,6 +25,12 @@
 (defn post-file-url [file]
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
+
+(defn post-date [file]
+  (let  [parse-format (SimpleDateFormat. "yyyy-MM-dd")
+	 date (.parse parse-format (re-find #"\d*-\d*-\d*" file)) 
+	 print-format (SimpleDateFormat. "dd MMM yyyy")]
+    (.format print-format date)))
 
 (def config
      (memoize
@@ -44,13 +51,15 @@
 
 (defn template [f]
   ;;get rid of this!!
-  (def *f* f)
+  (if (coll? f)
+    (def *f* f)
+    (def *f* (read-markdown f)))
   (with-temp-ns
     (use 'static.markdown)
     (use 'hiccup.core)
     (import java.io.File)
-    (let [[m c] (read-markdown static.core/*f*)
-	  template (str  (static.core/dir :templates) (:template m))]
+    (let [[m c] static.core/*f*
+	  template (str (static.core/dir :templates) (:template m))]
       (def metadata m)
       (def content c)
       (-> template 
@@ -124,6 +133,41 @@
 	 (tag-map)))
    (:encoding (config))))
 
+(defn pager [page]
+  (let [older [:div {:class "pager-left"}
+	       [:a {:href (str "/latest-posts/" (- page 1) "/")} 
+		"&laquo; Older Entries"]]
+	newer [:div {:class "pager-right"}
+	       [:a {:href (str "/latest-posts/" (+ page 1) "/")} 
+		"Newer Entries &raquo;"]]]
+    (cond (= page 0) (list older)
+	  (= page -1) (list newer)
+	  :default (list older newer))))
+
+(defn snippet
+  "Render a post for display in index pages."
+  [f]
+  (let [[metadata content] (read-markdown (str (dir :posts) f))]
+    [:div [:h2 [:a {:href (post-file-url f)} (:title meta)]]
+     [:p {:class "publish_date"}  (post-date f)]
+     [:p content]]))
+
+(defn create-latest-posts []
+  (let [posts (partition (:posts-per-page (config))
+			 (reverse (.list (File. (dir :posts)))))
+	pages (partition 2 (interleave 
+			    (reverse posts) 
+			    (concat (range (dec (count posts))) [-1])))]
+    (doseq [[posts page] pages]
+      (doseq [post posts]
+    	(FileUtils/writeStringToFile
+    	 (File. (:out-dir (config)) (str "latest-posts/" page "/index.html"))
+    	 (template
+	  [{:title (:site-title (config))
+	    :template (:default-template (config))}
+	   (html (list (snippet post) (pager page)))])
+    	 (:encoding (config)))))))
+
 (defn process-public []
   (let [in-dir (File. (dir :public))
 	out-dir (File. (:out-dir (config)))]
@@ -141,7 +185,8 @@
   (if (pos? (-> (dir :posts) (File.) .list count))
     (do 
       (create-rss)
-      (create-tags))))
+      (create-tags)
+      (create-latest-posts))))
 
 (defn -main [& args]
   (set-log-format)

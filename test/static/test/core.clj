@@ -49,6 +49,15 @@
     	   (re-find #"<a href=\"/2050/01/01/dummy-future-post-1/\">" 
 		    content)))))
 
+(deftest test-latest-posts
+  (let [page0 (File. "html/latest-posts/0/index.html")
+	page-1 (File. "html/latest-posts/-1/index.html")] 
+    (is (= true (.exists page0)))
+    (is (= true (.exists page-1)))
+    (is (= "<a href=\"/2050/03/03/dummy-future-post-3/\">"
+    	   (re-find #"<a href=\"/2050/03/03/dummy-future-post-3/\">"
+    		    (slurp page-1))))))
+
 (deftest test-process-site
   (let [html (File. "html/dummy.html")
 	static (File. "html/dummy.static")] 

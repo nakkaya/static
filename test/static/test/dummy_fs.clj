@@ -75,7 +75,9 @@ text dummy post 4"))
  :site-url \"http://www.dummy.com\"
  :in-dir \"resources/\"
  :out-dir \"html/\"
- :encoding \"UTF-8\"]"))
+ :default-template \"temp.clj\"
+ :encoding \"UTF-8\"
+ :posts-per-page 2]"))
 
 (defn create-dummy-fs []
   (create-resources)

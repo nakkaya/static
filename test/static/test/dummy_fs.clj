@@ -25,7 +25,7 @@ Some dummy file for unit testing."))
    (File. "resources/posts/2050-01-01-dummy-future-post-1.markdown")
    "---
 title: dummy future post 1
-tags: 4673 9c0e
+tags: 4673 9c0e same
 template: temp.clj
 ---
 
@@ -35,7 +35,7 @@ text dummy post 1")
    (File. "resources/posts/2050-02-02-dummy-future-post-2.markdown")
    "---
 title: dummy future post 2
-tags: e8edaab7 25e9
+tags: e8edaab7 25e9 same
 template: temp.clj
 ---
 
@@ -45,7 +45,7 @@ text dummy post 2")
    (File. "resources/posts/2050-03-03-dummy-future-post-3.markdown")
    "---
 title: dummy future post 3
-tags: 45f5 8a0c
+tags: 45f5 8a0c same
 template: temp.clj
 ---
 
@@ -55,7 +55,7 @@ text dummy post 3")
    (File. "resources/posts/2050-04-04-dummy-future-post-4.markdown")
    "---
 title: dummy future post 4
-tags: 4784d643 e4e8
+tags: 4784d643 e4e8 same
 template: temp.clj
 ---
 

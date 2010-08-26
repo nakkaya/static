@@ -38,6 +38,17 @@
 	   (re-find #"http://www.dummy.com/2050/04/04/dummy-future-post-4/" 
 		    content)))))
 
+(deftest test-rss-feed
+  (let [tags (File. "html/tags/index.html")
+	content (slurp tags)] 
+    (is (= 4 (count ((tag-map) "same"))))
+    (is (= true (.exists tags)))
+    (is (= "<a name=\"e4e8\">e4e8</a>" 
+	   (re-find #"<a name=\"e4e8\">e4e8</a>" content)))
+    (is (= "<a href=\"/2050/01/01/dummy-future-post-1/\">"
+    	   (re-find #"<a href=\"/2050/01/01/dummy-future-post-1/\">" 
+		    content)))))
+
 (deftest test-process-site
   (let [html (File. "html/dummy.html")
 	static (File. "html/dummy.static")] 

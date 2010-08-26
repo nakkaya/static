@@ -5,6 +5,7 @@
 	[clojure.contrib.command-line]
 	[clojure.contrib.logging]
 	[clojure.contrib.prxml])
+  (:use hiccup.core)
   (:use static.markdown :reload-all)
   (:use static.sftp :reload-all)
   (:import (java.io File)
@@ -95,6 +96,34 @@
 		(map post-xml posts)]]))
      (:encoding (config)))))
 
+(defn tag-map []
+  (reduce 
+   (fn[h v] 
+     (let [post (File. (str (dir :posts) v))
+	   [metadata _] (read-markdown post)
+	   info [(post-file-url v) (:title metadata)]
+	   tags (.split (:tags metadata) " ")]
+       (reduce 
+	(fn[m p] 
+	  (let [[tag info] p] 
+	    (if (nil? (m tag))
+	      (assoc m tag [info])
+	      (assoc m tag (conj (m tag) info)))))
+	    h (partition 2 (interleave tags (repeat info))))))
+   {} (.list (File. (dir :posts)))))
+
+(defn create-tags []
+  (FileUtils/writeStringToFile
+   (File. (:out-dir (config)) "tags/index.html")
+   (html
+    (map (fn[t]
+	   (let [[tag posts] t] 
+	     [:h4 [:a {:name tag} tag]
+	      (map #(let [[url title] %]
+		      [:li [:a {:href url} title]]) posts)]))
+	 (tag-map)))
+   (:encoding (config))))
+
 (defn process-public []
   (let [in-dir (File. (dir :public))
 	out-dir (File. (:out-dir (config)))]
@@ -110,7 +139,9 @@
   (process-site)
   (process-public)
   (if (pos? (-> (dir :posts) (File.) .list count))
-    (create-rss)))
+    (do 
+      (create-rss)
+      (create-tags))))
 
 (defn -main [& args]
   (set-log-format)

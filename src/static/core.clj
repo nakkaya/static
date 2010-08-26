@@ -237,7 +237,7 @@
       (create-latest-posts)
       (create-archives)
       (when (:blog-as-index (config))
-	(FileUtils/moveFile 
+	(FileUtils/copyFile 
 	 (File. (str (:out-dir (config)) 
 		     "latest-posts/-1/index.html")) 
 	 (File. (str (:out-dir (config)) "index.html")))))))

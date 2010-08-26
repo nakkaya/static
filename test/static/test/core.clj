@@ -64,6 +64,12 @@
     (is (= true (.exists index)))
     (is (= true (.exists a-2050-01)))))
 
+(deftest test-process-posts
+  (let [post1 (File. "html/2050/02/02/dummy-future-post-2/index.html")
+	post2 (File. "html/2050/04/04/dummy-future-post-4/index.html")] 
+    (is (= true (.exists post1)))
+    (is (= true (.exists post2)))))
+
 (deftest test-process-site
   (let [html (File. "html/dummy.html")
 	static (File. "html/dummy.static")] 

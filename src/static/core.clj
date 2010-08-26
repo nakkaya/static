@@ -203,6 +203,16 @@
 	  (map snippet posts))])
        (:encoding (config))))))
 
+(defn process-posts []
+  (doseq [f (.list (File. (dir :posts)))]
+    (let [out-file (apply str (-> (FilenameUtils/removeExtension f)
+				  (.split "-" 4)
+				  (interleave  (repeat \/))))]
+      (FileUtils/writeStringToFile 
+       (File. (str (:out-dir (config)) out-file "index.html"))
+       (template (str (dir :posts) f)) 
+       (:encoding (config))))))
+
 (defn process-public []
   (let [in-dir (File. (dir :public))
 	out-dir (File. (:out-dir (config)))]
@@ -219,6 +229,7 @@
   (process-public)
   (if (pos? (-> (dir :posts) (File.) .list count))
     (do 
+      (process-posts)
       (create-rss)
       (create-tags)
       (create-latest-posts)

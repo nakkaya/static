@@ -64,7 +64,10 @@
     (use 'hiccup.core)
     (import java.io.File)
     (let [[m c] static.core/*f*
-	  template (str (static.core/dir :templates) (:template m))]
+	  template (if (:template m)
+		     (str (static.core/dir :templates) (:template m))
+		     (str (static.core/dir :templates) 
+			  (:default-template (static.core/config))))]
       (def metadata m)
       (def content c)
       (-> template 

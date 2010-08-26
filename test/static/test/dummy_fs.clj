@@ -15,7 +15,6 @@
 title: dummy content
 description: some dummy desc
 tags: unit test
-template: temp.clj
 ---
 
 Some dummy file for unit testing."))
@@ -46,7 +45,6 @@ text dummy post 2")
    "---
 title: dummy future post 3
 tags: 45f5 8a0c same
-template: temp.clj
 ---
 
 text dummy post 3")

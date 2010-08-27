@@ -25,24 +25,15 @@
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
 
-(defn template 
-  "Embed content in template."
-  [f]
-  ;;get rid of this!!
-  (if (coll? f)
-    (def *f* f)
-    (def *f* (read-markdown f)))
-  (with-temp-ns
-    (use 'static.config)
-    (use 'static.io)
-    (use 'hiccup.core)
-    (import java.io.File)
-    (let [[m c] static.core/*f*
-	  template (if (:template m)
-		     (:template m) 
-		     (:default-template (config)))]
-      (def metadata m)
-      (def content c)
+(declare metadata content)
+
+(defn template [page]
+  (let [[m c] page
+	template (if (:template m)
+		   (:template m) 
+		   (:default-template (static.config/config)))]
+    (binding [*ns* (the-ns 'static.core)
+	      metadata m content c]
       (-> (read-template template) eval html))))
 
 (defn process-site 

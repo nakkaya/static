@@ -13,6 +13,8 @@
 	      (assoc h key v)))
 	  {} (re-seq #"([^:]+): (.+)(\n|$)" metadata)))
 
-(defn read-markdown [file]
-  (let [[metadata content] (split-file (slurp file))]
-    [(prepare-metadata metadata) (markdown content)]))
+(def read-markdown 
+     (memoize
+      (fn [file]
+	(let [[metadata content] (split-file (slurp file))]
+	  [(prepare-metadata metadata) (markdown content)]))))

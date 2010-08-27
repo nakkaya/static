@@ -1,6 +1,6 @@
 (ns static.test.core
   (:use [static.core] :reload)
-  (:use [static.markdown] :reload)
+  (:use [static.io] :reload)
   (:use [static.test.dummy-fs] :reload)
   (:use [clojure.test])
   (:use [clojure.contrib.io :only [delete-file-recursively]])

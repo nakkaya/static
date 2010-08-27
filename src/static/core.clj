@@ -6,6 +6,7 @@
 	[clojure.contrib.logging]
 	[clojure.contrib.prxml])
   (:use hiccup.core)
+  (:use static.config :reload-all)
   (:use static.markdown :reload-all)
   (:use static.deploy :reload-all)
   (:import (java.io File)
@@ -13,29 +14,10 @@
 	   (org.apache.commons.io FileUtils FilenameUtils)
 	   (java.text SimpleDateFormat)))
 
-(defn set-log-format []
-  (let [logger (impl-get-log "")]
-    (doseq [handler (.getHandlers logger)]
-      (. handler setFormatter 
-	 (proxy [java.util.logging.Formatter] [] 
-	   (format 
-	    [record] 
-	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
-
 (defn parse-date 
   "Format date from in spec to out spec."
   [in out date]
   (.format (SimpleDateFormat. out) (.parse (SimpleDateFormat. in) date)))
-
-(def config
-     (memoize
-      #(try 
-	(apply hash-map (read-string (slurp (File. "config.clj"))))
-	(catch Exception e (do 
-			     (info "Configuration not found using defaults.")
-			     {:in-dir "resources/"
-			      :out-dir "html/"
-			      :encoding "UTF-8"})))))
 
 (defn dir [dir]
   (cond (= dir :templates) (str (:in-dir (config)) "templates/")
@@ -65,12 +47,12 @@
 	  template (if (:template m)
 		     (str (static.core/dir :templates) (:template m))
 		     (str (static.core/dir :templates) 
-			  (:default-template (static.core/config))))]
+			  (:default-template (static.config/config))))]
       (def metadata m)
       (def content c)
       (-> template 
 	  (File.) 
-	  (slurp :encoding (:encoding (static.core/config))) 
+	  (slurp :encoding (:encoding (static.config/config))) 
 	  read-string 
 	  eval
 	  html))))
@@ -296,7 +278,6 @@
 	   (File. (str (:out-dir (config)) "index.html"))))))))
 
 (defn -main [& args]
-  (set-log-format)
   (with-command-line args
     "Static"
     [[build? b? "Build Site."]

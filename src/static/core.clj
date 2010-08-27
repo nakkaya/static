@@ -22,7 +22,9 @@
 	    [record] 
 	    (str (.getLevel record) ": " (.getMessage record) "\n")))))))
 
-(defn parse-date [in out date]
+(defn parse-date 
+  "Format date from in spec to out spec."
+  [in out date]
   (.format (SimpleDateFormat. out) (.parse (SimpleDateFormat. in) date)))
 
 (def config
@@ -42,19 +44,15 @@
 	(= dir :posts) (str (:in-dir (config)) "posts/")
 	:default (throw (Exception. "Unknown Directory."))))
 
-(defn post-url [file]
+(defn post-url 
+  "Given a post file return its URL."
+  [file]
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
 
-(defn post-count-by-mount []
-  (reduce (fn [h v]
-	    (let  [date (re-find #"\d*-\d*" v)]
-	      (if (nil? (h date))
-		(assoc h date 1)
-		(assoc h date (+ 1 (h date)))))) 
-	  {} (.list (File. (dir :posts)))))
-
-(defn template [f]
+(defn template 
+  "Embed content in template."
+  [f]
   ;;get rid of this!!
   (if (coll? f)
     (def *f* f)
@@ -77,7 +75,9 @@
 	  eval
 	  html))))
 
-(defn process-site []
+(defn process-site 
+  "Process site pages."
+  []
   (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
     (let [[metadata content] (read-markdown f)] 
       (FileUtils/writeStringToFile 
@@ -88,6 +88,10 @@
 	   (File.)) 
        (template [(assoc metadata :type :site) content]) 
        (:encoding (config))))))
+
+;;
+;; Create RSS Feed.
+;;
 
 (defn post-xml
   "Create RSS item node."
@@ -115,7 +119,13 @@
 		(map post-xml posts)]]))
      (:encoding (config)))))
 
-(defn tag-map []
+;;
+;; Create Tags Page.
+;;
+
+(defn tag-map 
+  "Create a map of tags and posts contining them. {tag1 => [url1 url2..]}"
+  []
   (reduce 
    (fn[h v] 
      (let [post (File. (str (dir :posts) v))
@@ -131,7 +141,9 @@
 	h (partition 2 (interleave tags (repeat info))))))
    (sorted-map) (.list (File. (dir :posts)))))
 
-(defn create-tags []
+(defn create-tags 
+  "Create and write tags page."
+  []
   (FileUtils/writeStringToFile
    (File. (:out-dir (config)) "tags/index.html")
    (template
@@ -146,7 +158,13 @@
 	   (tag-map)))])
    (:encoding (config))))
 
-(defn pager [page max-index]
+;;
+;; Create pages for latest posts.
+;;
+
+(defn pager
+  "Return previous, next navigation links."
+  [page max-index]
   (let [older [:div {:class "pager-left"}
 	       [:a {:href (str "/latest-posts/" (- page 1) "/")} 
 		"&laquo; Older Entries"]]
@@ -166,7 +184,9 @@
       (parse-date "yyyy-MM-dd" "dd MMM yyyy" (re-find #"\d*-\d*-\d*" f))]
      [:p content]]))
 
-(defn create-latest-posts []
+(defn create-latest-posts 
+  "Create and write latest post pages."
+  []
   (let [posts (partition (:posts-per-page (config))
 			 (reverse (.list (File. (dir :posts)))))
 	pages (partition 2 (interleave (reverse posts) (range)))
@@ -180,7 +200,24 @@
     	 (html (list (map #(snippet %) posts) (pager page max-index)))])
        (:encoding (config))))))
 
-(defn create-archives []
+;;
+;; Create Archive Pages.
+;;
+
+(defn post-count-by-mount 
+  "Create a map of month to post count {month => count}"
+  []
+  (reduce (fn [h v]
+	    (let  [date (re-find #"\d*-\d*" v)]
+	      (if (nil? (h date))
+		(assoc h date 1)
+		(assoc h date (+ 1 (h date)))))) 
+	  {} (.list (File. (dir :posts)))))
+
+(defn create-archives 
+  "Create and write archive pages."
+  []
+  ;;create main archive page.
   (FileUtils/writeStringToFile
    (File. (:out-dir (config)) (str "archives/index.html"))
    (template
@@ -195,7 +232,7 @@
 		 [:li [:a {:href url} date] count]) 
 	      (post-count-by-mount))]))])
    (:encoding (config)))
-  ;;create a page for each month
+  ;;create a page for each month.
   (doseq [month (keys (post-count-by-mount))] 
     (let [posts (filter #(.startsWith % month) 
 			(.list (File. (dir :posts))))]
@@ -209,7 +246,9 @@
 	  (map snippet posts))])
        (:encoding (config))))))
 
-(defn process-posts []
+(defn process-posts 
+  "Create and write post pages."
+  []
   (doseq [f (.list (File. (dir :posts)))]
     (let [[metadata content] (read-markdown (str (dir :posts) f))
 	  out-file (apply str (-> (FilenameUtils/removeExtension f)
@@ -221,7 +260,9 @@
 			 :url (post-url f)) content])
        (:encoding (config))))))
 
-(defn process-public []
+(defn process-public 
+  "Copy public from in-dir to out-dir."
+  []
   (let [in-dir (File. (dir :public))
 	out-dir (File. (:out-dir (config)))]
     (doseq [f (map #(File. in-dir %) (.list in-dir))]
@@ -229,7 +270,9 @@
 	(FileUtils/copyFileToDirectory f out-dir)
 	(FileUtils/copyDirectoryToDirectory f out-dir)))))
 
-(defn create [] 
+(defn create 
+  "Build Site."
+  [] 
   (doto (File. (:out-dir (config)))
     (delete-file-recursively true)
     (.mkdir))

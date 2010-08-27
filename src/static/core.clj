@@ -7,7 +7,7 @@
 	[clojure.contrib.prxml])
   (:use hiccup.core)
   (:use static.markdown :reload-all)
-  (:use static.sftp :reload-all)
+  (:use static.deploy :reload-all)
   (:import (java.io File)
 	   (java.net URL)
 	   (org.apache.commons.io FileUtils FilenameUtils)
@@ -299,12 +299,18 @@
   (set-log-format)
   (with-command-line args
     "Static"
-    [[build? b?   "Build Site."]
-     [deploy? d?   "Deploy over SSH."]]
+    [[build? b? "Build Site."]
+     [ssh? s?   "Deploy using SFTP."]
+     [rsync? -r  "Deploy using rsync."]]
     (cond build? (create)
-	  deploy? (deploy (:out-dir (config)) 
-			  (:host (config)) 
-			  (:port (config))
-			  (:user (config))
-			  (:deploy-dir (config)))
+	  ssh? (deploy-sftp (:out-dir (config)) 
+			    (:host (config)) 
+			    (:port (config))
+			    (:user (config))
+			    (:deploy-dir (config)))
+	  rsync? (deploy-rsync (:out-dir (config)) 
+			       (:host (config)) 
+			       (:port (config))
+			       (:user (config))
+			       (:deploy-dir (config)))
 	  :default (println "Use -h for options."))))

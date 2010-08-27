@@ -1,5 +1,6 @@
-(ns static.sftp
-  (:use clojure.contrib.logging)
+(ns static.deploy
+  (:use [clojure.contrib.logging]
+	[clojure.java.shell])
   (:use clj-ssh.ssh)
   (:import (java.io File)))
 
@@ -20,7 +21,7 @@
     (sftp ch :put (str f) (-> (str f) (.replaceAll out-dir deploy-dir))))
   (info "Transfer Done."))
 
-(defn deploy [out-dir host port user deploy-dir]
+(defn deploy-sftp [out-dir host port user deploy-dir]
   (with-ssh-agent []
     (let [session (session host :strict-host-key-checking :no
   			   :port port :username user)]
@@ -29,3 +30,8 @@
   	  (with-connection channel
 	    (mirror-folders-sftp channel out-dir deploy-dir)
 	    (put-files channel out-dir deploy-dir)))))))
+
+(defn deploy-rsync [out-dir host user deploy-dir]
+  (let [cmd ["rsync" "-avz" "--delete" "-e" "ssh" 
+	     out-dir (str user "@" host ":" deploy-dir)]] 
+    (info (:out (apply sh cmd)))))

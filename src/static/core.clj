@@ -7,7 +7,7 @@
 	[clojure.contrib.prxml])
   (:use hiccup.core)
   (:use static.config :reload-all)
-  (:use static.markdown :reload-all)
+  (:use static.io :reload-all)
   (:use static.deploy :reload-all)
   (:import (java.io File)
 	   (java.net URL)
@@ -18,13 +18,6 @@
   "Format date from in spec to out spec."
   [in out date]
   (.format (SimpleDateFormat. out) (.parse (SimpleDateFormat. in) date)))
-
-(defn dir [dir]
-  (cond (= dir :templates) (str (:in-dir (config)) "templates/")
-	(= dir :public) (str (:in-dir (config)) "public/")
-	(= dir :site) (str (:in-dir (config)) "site/")
-	(= dir :posts) (str (:in-dir (config)) "posts/")
-	:default (throw (Exception. "Unknown Directory."))))
 
 (defn post-url 
   "Given a post file return its URL."
@@ -40,22 +33,17 @@
     (def *f* f)
     (def *f* (read-markdown f)))
   (with-temp-ns
-    (use 'static.markdown)
+    (use 'static.config)
+    (use 'static.io)
     (use 'hiccup.core)
     (import java.io.File)
     (let [[m c] static.core/*f*
 	  template (if (:template m)
-		     (str (static.core/dir :templates) (:template m))
-		     (str (static.core/dir :templates) 
-			  (:default-template (static.config/config))))]
+		     (:template m) 
+		     (:default-template (config)))]
       (def metadata m)
       (def content c)
-      (-> template 
-	  (File.) 
-	  (slurp :encoding (:encoding (static.config/config))) 
-	  read-string 
-	  eval
-	  html))))
+      (-> (read-template template) eval html))))
 
 (defn process-site 
   "Process site pages."

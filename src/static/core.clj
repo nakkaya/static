@@ -65,7 +65,7 @@
   "Create RSS feed."
   []
   (let [in-dir (File. (dir :posts))
-	posts (take 10 (map #(File. in-dir %) (.list in-dir)))]
+	posts (take 10 (reverse (map #(File. in-dir %) (.list in-dir))))]
     (write-out-dir "rss-feed"
 		   (with-out-str
 		     (prxml [:decl! {:version "1.0"}] 

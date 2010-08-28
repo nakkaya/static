@@ -247,8 +247,8 @@
   (with-command-line args
     "Static"
     [[build? b? "Build Site."]
-     [ssh? s?   "Deploy using SFTP."]
-     [rsync? -r  "Deploy using rsync."]]
+     [ssh? s?    "Deploy using SFTP."]
+     [rsync? r?  "Deploy using rsync."]]
     (cond build? (info (with-out-str (time (create))))
 	  ssh? (deploy-sftp (:out-dir (config)) 
 			    (:host (config)) 

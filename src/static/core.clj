@@ -40,15 +40,13 @@
   "Process site pages."
   []
   (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
-    (let [[metadata content] (read-markdown f)] 
-      (FileUtils/writeStringToFile 
+    (let [[metadata content] (read-markdown f)]
+      (write-out-dir
        (-> (str f)
-	   (.replaceAll (dir :site) (:out-dir (config)))
+	   (.replaceAll (dir :site) "")
 	   (FilenameUtils/removeExtension)
-	   (str ".html")
-	   (File.)) 
-       (template [(assoc metadata :type :site) content]) 
-       (:encoding (config))))))
+	   (str ".html"))
+       (template [(assoc metadata :type :site) content])))))
 
 ;;
 ;; Create RSS Feed.
@@ -68,17 +66,15 @@
   []
   (let [in-dir (File. (dir :posts))
 	posts (take 10 (map #(File. in-dir %) (.list in-dir)))]
-    (FileUtils/writeStringToFile
-     (File. (:out-dir (config)) "rss-feed")
-     (with-out-str
-       (prxml [:decl! {:version "1.0"}] 
-	      [:rss {:version "2.0"} 
-	       [:channel 
-		[:title (:site-title (config))]
-		[:link (:site-url (config))]
-		[:description (:site-description (config))]
-		(map post-xml posts)]]))
-     (:encoding (config)))))
+    (write-out-dir "rss-feed"
+		   (with-out-str
+		     (prxml [:decl! {:version "1.0"}] 
+			    [:rss {:version "2.0"} 
+			     [:channel 
+			      [:title (:site-title (config))]
+			      [:link (:site-url (config))]
+			      [:description (:site-description (config))]
+			      (map post-xml posts)]])))))
 
 ;;
 ;; Create Tags Page.
@@ -105,19 +101,18 @@
 (defn create-tags 
   "Create and write tags page."
   []
-  (FileUtils/writeStringToFile
-   (File. (:out-dir (config)) "tags/index.html")
-   (template
-    [{:title "Tags" :template (:default-template (config))}
-     (html
-      (map (fn[t]
-	     (let [[tag posts] t] 
-	       [:h4 [:a {:name tag} tag]
-		[:ul
-		 (map #(let [[url title] %]
-			 [:li [:a {:href url} title]]) posts)]]))
-	   (tag-map)))])
-   (:encoding (config))))
+  (write-out-dir "tags/index.html"
+		 (template
+		  [{:title "Tags" :template (:default-template (config))}
+		   (html
+		    (map (fn[t]
+			   (let [[tag posts] t] 
+			     [:h4 [:a {:name tag} tag]
+			      [:ul
+			       (map #(let [[url title] %]
+				       [:li [:a {:href url} title]]) 
+				    posts)]]))
+			 (tag-map)))])))
 
 ;;
 ;; Create pages for latest posts.
@@ -153,13 +148,12 @@
 	pages (partition 2 (interleave (reverse posts) (range)))
 	[_ max-index] (last pages)]
     (doseq [[posts page] pages]
-      (FileUtils/writeStringToFile
-       (File. (:out-dir (config)) (str "latest-posts/" page "/index.html"))
+      (write-out-dir
+       (str "latest-posts/" page "/index.html")
        (template
     	[{:title (:site-title (config))
     	  :template (:default-template (config))}
-    	 (html (list (map #(snippet %) posts) (pager page max-index)))])
-       (:encoding (config))))))
+    	 (html (list (map #(snippet %) posts) (pager page max-index)))])))))
 
 ;;
 ;; Create Archive Pages.
@@ -179,8 +173,8 @@
   "Create and write archive pages."
   []
   ;;create main archive page.
-  (FileUtils/writeStringToFile
-   (File. (:out-dir (config)) (str "archives/index.html"))
+  (write-out-dir
+   (str "archives/index.html")
    (template
     [{:title "Archives" :template (:default-template (config))}
      (html 
@@ -191,20 +185,16 @@
 		     date (parse-date "yyyy-MM" "MMMM yyyy" (first %))
 		     count (str " (" (second %) ")")]
 		 [:li [:a {:href url} date] count]) 
-	      (post-count-by-mount))]))])
-   (:encoding (config)))
+	      (post-count-by-mount))]))]))
   ;;create a page for each month.
   (doseq [month (keys (post-count-by-mount))] 
     (let [posts (filter #(.startsWith % month) 
 			(.list (File. (dir :posts))))]
-      (FileUtils/writeStringToFile
-       (File. (:out-dir (config)) (str "archives/" 
-				       (.replace month "-" "/") 
-				       "/index.html"))
+      (write-out-dir
+       (str "archives/" (.replace month "-" "/") "/index.html")
        (template
 	[{:title "Archives" :template (:default-template (config))}
-	 (html (map snippet posts))])
-       (:encoding (config))))))
+	 (html (map snippet posts))])))))
 
 (defn process-posts 
   "Create and write post pages."
@@ -213,10 +203,10 @@
     (let [[metadata content] (read-markdown (str (dir :posts) f))
 	  out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
 			   (FilenameUtils/removeExtension f) (range 3))]
-      (FileUtils/writeStringToFile 
-       (File. (str (:out-dir (config)) out-file "/index.html"))
-       (template [(assoc metadata :type :post :url (post-url f)) content])
-       (:encoding (config))))))
+      (write-out-dir 
+       (str out-file "/index.html")
+       (template 
+	[(assoc metadata :type :post :url (post-url f)) content])))))
 
 (defn process-public 
   "Copy public from in-dir to out-dir."

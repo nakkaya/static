@@ -1,7 +1,8 @@
 (ns static.io
   (:use static.config :reload-all)
   (:import (com.petebevin.markdown MarkdownProcessor)
-	   (java.io File)))
+	   (java.io File)
+	   (org.apache.commons.io FileUtils)))
 
 (defn- markdown [txt] (.markdown (MarkdownProcessor.) txt))
 
@@ -36,3 +37,7 @@
 	    (File.) 
 	    (slurp :encoding (:encoding (config)))
 	    read-string))))
+
+(defn write-out-dir [file str]
+  (FileUtils/writeStringToFile 
+   (File. (:out-dir (config)) file) str (:encoding (config))))

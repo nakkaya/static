@@ -257,7 +257,6 @@
 			    (:deploy-dir (config)))
 	  rsync? (deploy-rsync (:out-dir (config)) 
 			       (:host (config)) 
-			       (:port (config))
 			       (:user (config))
 			       (:deploy-dir (config)))
 	  :default (println "Use -h for options."))))

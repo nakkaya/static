@@ -203,8 +203,7 @@
 				       "/index.html"))
        (template
 	[{:title "Archives" :template (:default-template (config))}
-	 (html 
-	  (map snippet posts))])
+	 (html (map snippet posts))])
        (:encoding (config))))))
 
 (defn process-posts 
@@ -212,13 +211,11 @@
   []
   (doseq [f (.list (File. (dir :posts)))]
     (let [[metadata content] (read-markdown (str (dir :posts) f))
-	  out-file (apply str (-> (FilenameUtils/removeExtension f)
-				  (.split "-" 4)
-				  (interleave  (repeat \/))))]
+	  out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
+			   (FilenameUtils/removeExtension f) (range 3))]
       (FileUtils/writeStringToFile 
-       (File. (str (:out-dir (config)) out-file "index.html"))
-       (template [(assoc metadata :type :post
-			 :url (post-url f)) content])
+       (File. (str (:out-dir (config)) out-file "/index.html"))
+       (template [(assoc metadata :type :post :url (post-url f)) content])
        (:encoding (config))))))
 
 (defn process-public 

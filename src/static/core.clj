@@ -5,6 +5,9 @@
 	[clojure.contrib.command-line]
 	[clojure.contrib.logging]
 	[clojure.contrib.prxml])
+  (:use clojure.java.browse)
+  (:use ring.adapter.jetty)
+  (:use ring.middleware.file)
   (:use hiccup.core)
   (:use static.config :reload-all)
   (:use static.io :reload-all)
@@ -248,7 +251,8 @@
     "Static"
     [[build? b? "Build Site."]
      [ssh? s?    "Deploy using SFTP."]
-     [rsync? r?  "Deploy using rsync."]]
+     [rsync? r?  "Deploy using rsync."]
+     [jetty? j?  "Run Jetty."]]
     (cond build? (info (with-out-str (time (create))))
 	  ssh? (deploy-sftp (:out-dir (config)) 
 			    (:host (config)) 
@@ -259,4 +263,9 @@
 			       (:host (config)) 
 			       (:user (config))
 			       (:deploy-dir (config)))
+	  jetty? (do (future
+		      (run-jetty (-> #(% {}) 
+				     (wrap-file (:out-dir (config)))) 
+				 {:port 8080}))
+		     (browse-url "http://127.0.0.1:8080"))
 	  :default (println "Use -h for options."))))

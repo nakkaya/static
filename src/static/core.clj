@@ -148,6 +148,8 @@
   "Create and write latest post pages."
   []
   (let [posts (partition (:posts-per-page (config))
+			 (:posts-per-page (config))
+			 []
 			 (reverse (list-files :posts)))
 	pages (partition 2 (interleave (reverse posts) (range)))
 	[_ max-index] (last pages)]

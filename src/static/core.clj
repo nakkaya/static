@@ -250,15 +250,9 @@
   (with-command-line args
     "Static"
     [[build? b? "Build Site."]
-     [ssh? s?    "Deploy using SFTP."]
      [rsync? r?  "Deploy using rsync."]
      [jetty? j?  "Run Jetty."]]
     (cond build? (info (with-out-str (time (create))))
-	  ssh? (deploy-sftp (:out-dir (config)) 
-			    (:host (config)) 
-			    (:port (config))
-			    (:user (config))
-			    (:deploy-dir (config)))
 	  rsync? (deploy-rsync (:out-dir (config)) 
 			       (:host (config)) 
 			       (:user (config))

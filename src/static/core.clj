@@ -42,14 +42,15 @@
 (defn process-site 
   "Process site pages."
   []
-  (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
-    (let [[metadata content] (read-markdown f)]
-      (write-out-dir
-       (-> (str f)
-	   (.replaceAll (dir :site) "")
-	   (FilenameUtils/removeExtension)
-	   (str ".html"))
-       (template [(assoc metadata :type :site) content])))))
+  (if (-> (dir :site) File. .isDirectory)
+    (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
+      (let [[metadata content] (read-markdown f)]
+	(write-out-dir
+	 (-> (str f)
+	     (.replaceAll (dir :site) "")
+	     (FilenameUtils/removeExtension)
+	     (str ".html"))
+	 (template [(assoc metadata :type :site) content]))))))
 
 ;;
 ;; Create RSS Feed.

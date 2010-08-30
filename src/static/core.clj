@@ -42,15 +42,14 @@
 (defn process-site 
   "Process site pages."
   []
-  (if (-> (dir :site) File. .isDirectory)
-    (doseq [f (FileUtils/listFiles (File. (dir :site)) nil true)]
-      (let [[metadata content] (read-markdown f)]
-	(write-out-dir
-	 (-> (str f)
-	     (.replaceAll (dir :site) "")
-	     (FilenameUtils/removeExtension)
-	     (str ".html"))
-	 (template [(assoc metadata :type :site) content]))))))
+  (doseq [f (list-files :site)]
+    (let [[metadata content] (read-markdown f)]
+      (write-out-dir
+       (-> (str f)
+	   (.replaceAll (dir :site) "")
+	   (FilenameUtils/removeExtension)
+	   (str ".html"))
+       (template [(assoc metadata :type :site) content])))))
 
 ;;
 ;; Create RSS Feed.
@@ -69,7 +68,7 @@
   "Create RSS feed."
   []
   (let [in-dir (File. (dir :posts))
-	posts (take 10 (reverse (map #(File. in-dir %) (.list in-dir))))]
+	posts (take 10 (reverse (list-files :posts)))]
     (write-out-dir "rss-feed"
 		   (with-out-str
 		     (prxml [:decl! {:version "1.0"}] 
@@ -89,8 +88,7 @@
   []
   (reduce 
    (fn[h v] 
-     (let [post (File. (str (dir :posts) v))
-	   [metadata _] (read-markdown post)
+     (let [[metadata _] (read-markdown v)
 	   info [(post-url v) (:title metadata)]
 	   tags (.split (:tags metadata) " ")]
        (reduce 
@@ -100,7 +98,7 @@
 	      (assoc m tag [info])
 	      (assoc m tag (conj (m tag) info)))))
 	h (partition 2 (interleave tags (repeat info))))))
-   (sorted-map) (.list (File. (dir :posts)))))
+   (sorted-map) (list-files :posts)))
 
 (defn create-tags 
   "Create and write tags page."
@@ -138,17 +136,19 @@
 (defn snippet
   "Render a post for display in index pages."
   [f]
-  (let [[metadata content] (read-markdown (str (dir :posts) f))]
+  (let [[metadata content] (read-markdown f)]
     [:div [:h2 [:a {:href (post-url f)} (:title metadata)]]
      [:p {:class "publish_date"}  
-      (parse-date "yyyy-MM-dd" "dd MMM yyyy" (re-find #"\d*-\d*-\d*" f))]
+      (parse-date "yyyy-MM-dd" "dd MMM yyyy" 
+		  (re-find #"\d*-\d*-\d*" 
+			   (FilenameUtils/getBaseName (str f))))]
      [:p content]]))
 
 (defn create-latest-posts 
   "Create and write latest post pages."
   []
   (let [posts (partition (:posts-per-page (config))
-			 (reverse (.list (File. (dir :posts)))))
+			 (reverse (list-files :posts)))
 	pages (partition 2 (interleave (reverse posts) (range)))
 	[_ max-index] (last pages)]
     (doseq [[posts page] pages]
@@ -167,11 +167,12 @@
   "Create a map of month to post count {month => count}"
   []
   (reduce (fn [h v]
-	    (let  [date (re-find #"\d*-\d*" v)]
+	    (let  [date (re-find #"\d*-\d*" 
+				 (FilenameUtils/getBaseName (str v)))]
 	      (if (nil? (h date))
 		(assoc h date 1)
 		(assoc h date (+ 1 (h date)))))) 
-	  {} (.list (File. (dir :posts)))))
+	  {} (list-files :posts)))
 
 (defn create-archives 
   "Create and write archive pages."
@@ -192,8 +193,9 @@
 	      (post-count-by-mount))]))]))
   ;;create a page for each month.
   (doseq [month (keys (post-count-by-mount))] 
-    (let [posts (filter #(.startsWith % month) 
-			(.list (File. (dir :posts))))]
+    (let [posts (filter #(.startsWith 
+			  (FilenameUtils/getBaseName (str %)) month)
+			(list-files :posts))]
       (write-out-dir
        (str "archives/" (.replace month "-" "/") "/index.html")
        (template
@@ -203,10 +205,10 @@
 (defn process-posts 
   "Create and write post pages."
   []
-  (doseq [f (.list (File. (dir :posts)))]
-    (let [[metadata content] (read-markdown (str (dir :posts) f))
+  (doseq [f (list-files :posts)]
+    (let [[metadata content] (read-markdown f)
 	  out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
-			   (FilenameUtils/removeExtension f) (range 3))]
+			   (FilenameUtils/getBaseName (str f)) (range 3))]
       (write-out-dir 
        (str out-file "/index.html")
        (template 

@@ -28,6 +28,12 @@
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
 
+(defn site-url [f]
+  (-> (str f)
+      (.replaceAll (dir :site) "")
+      (FilenameUtils/removeExtension)
+      (str ".html")))
+
 (declare metadata content)
 
 (defn template [page]
@@ -45,10 +51,7 @@
   (doseq [f (list-files :site)]
     (let [[metadata content] (read-markdown f)]
       (write-out-dir
-       (-> (str f)
-	   (.replaceAll (dir :site) "")
-	   (FilenameUtils/removeExtension)
-	   (str ".html"))
+       (site-url f)
        (template [(assoc metadata :type :site) content])))))
 
 ;;
@@ -78,6 +81,21 @@
 			      [:link (:site-url (config))]
 			      [:description (:site-description (config))]
 			      (map post-xml posts)]])))))
+
+(defn create-sitemap
+  "Create sitemap."
+  []
+  (write-out-dir 
+   "sitemap.xml"
+   (let [base (:site-url (config))] 
+     (with-out-str
+       (prxml [:decl! {:version "1.0" :encoding "UTF-8"}] 
+	      [:urlset {:xmlns "http://www.sitemaps.org/schemas/sitemap/0.9"}
+	       [:url [:loc base]]
+	       (map #(vector :url [:loc (str base %)]) 
+		    (map post-url (list-files :posts)))
+	       (map #(vector :url [:loc (str base "/" %)]) 
+		    (map site-url (list-files :site)))])))))
 
 ;;
 ;; Create Tags Page.
@@ -241,6 +259,7 @@
       (create-tags)
       (create-latest-posts)
       (create-archives)
+      (create-sitemap)
       (when (:blog-as-index (config))
 	(let [max (apply max (map read-string (-> (:out-dir (config))
 						  (str  "latest-posts/")

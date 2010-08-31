@@ -38,6 +38,19 @@
 	   (re-find #"http://www.dummy.com/2050/04/04/dummy-future-post-4/" 
 		    content)))))
 
+(deftest test-site-map
+  (let [sitemap (File. "html/sitemap.xml")
+	content (slurp sitemap)] 
+    (is (= true (.exists sitemap)))
+    (is (= "<loc>http://www.dummy.com</loc>"
+    	   (re-find #"<loc>http://www.dummy.com</loc>" content)))
+    (is (= "http://www.dummy.com/2050/01/01/dummy-future-post-1/"
+    	   (re-find #"http://www.dummy.com/2050/01/01/dummy-future-post-1/" 
+		    content)))
+    (is (= "<loc>http://www.dummy.com/dummy.html</loc>"
+    	   (re-find #"<loc>http://www.dummy.com/dummy.html</loc>" 
+		    content)))))
+
 (deftest test-rss-feed
   (let [tags (File. "html/tags/index.html")
 	content (slurp tags)] 

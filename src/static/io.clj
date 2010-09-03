@@ -33,7 +33,13 @@
 (defn list-files [d]
   (let [d (File. (dir d))] 
     (if (.isDirectory d)
-      (FileUtils/listFiles d (into-array ["markdown"]) true) [] )))
+      (filter
+       #(let [[metadata _] (read-markdown %)
+	      published? (:published metadata)]
+	  (if (or (nil? published?)
+		  (= published? "true"))
+	    true false))
+       (FileUtils/listFiles d (into-array ["markdown"]) true)) [] )))
 
 (def read-template
      (memoize

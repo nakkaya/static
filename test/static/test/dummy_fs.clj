@@ -57,7 +57,17 @@ tags: 4784d643 e4e8 same
 template: temp.clj
 ---
 
-text dummy post 4"))
+text dummy post 4")
+
+(spit 
+   (File. "resources/posts/2050-05-05-dummy-future-post-5.markdown")
+   "---
+title: dummy future post 5
+tags: 6662
+published: false
+---
+
+Should be skipped..."))
 
 (defn- create-template []
   (spit (File. "resources/templates/temp.clj") "content"))

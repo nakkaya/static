@@ -24,6 +24,9 @@
     (is (= "Some dummy file for unit testing."
 	   (re-find #"Some dummy file for unit testing." content)))))
 
+(deftest test-io
+  (is (= (count (list-files :posts)) 4)))
+
 (deftest test-rss-feed
   (let [rss (File. "html/rss-feed")
 	content (slurp rss)] 

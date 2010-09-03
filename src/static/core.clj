@@ -1,7 +1,6 @@
 (ns static.core
   (:gen-class)
   (:use [clojure.contrib.io :only [delete-file-recursively]]
-	[clojure.contrib.with-ns]
 	[clojure.contrib.command-line]
 	[clojure.contrib.logging]
 	[clojure.contrib.prxml])

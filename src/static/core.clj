@@ -175,6 +175,7 @@
        (str "latest-posts/" page "/index.html")
        (template
     	[{:title (:site-title (config))
+	  :description (:site-description (config))
     	  :template (:default-template (config))}
     	 (html (list (map #(snippet %) posts) (pager page max-index)))])))))
 

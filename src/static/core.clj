@@ -7,6 +7,7 @@
   (:use clojure.java.browse)
   (:use ring.adapter.jetty)
   (:use ring.middleware.file)
+  (:use ring.util.response)
   (:use hiccup.core)
   (:use static.config :reload-all)
   (:use static.io :reload-all)
@@ -270,6 +271,18 @@
 		       "latest-posts/" max "/index.html")) 
 	   (File. (str (:out-dir (config)) "index.html"))))))))
 
+(defn serve-static [req] 
+  (let [mime-types {".clj" "text/plain"
+		    ".mp4" "video/mp4"
+		    ".ogv" "video/ogg"}]
+    (if-let [f (file-response (:uri req) {:root (:out-dir (config))})] 
+      (if-let [mimetype (mime-types (re-find #"\..+$" (:uri req)))] 
+	(merge f {:headers {"Content-Type" mimetype}}) 
+	f))))
+
+;;(serve-static {:uri "/code/clojure/robocup.clj"})
+;;(serve-static {:uri "/index.html"})
+
 (defn -main [& args]
   (with-command-line args
     "Static"
@@ -287,9 +300,6 @@
 			       (:host (config)) 
 			       (:user (config))
 			       (:deploy-dir (config)))
-	  jetty? (do (future
-		      (run-jetty (-> #(% {}) 
-				     (wrap-file (:out-dir (config)))) 
-				 {:port 8080}))
+	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))
 	  :default (println "Use -h for options."))))

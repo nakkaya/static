@@ -125,6 +125,7 @@
 		 (template
 		  [{:title "Tags" :template (:default-template (config))}
 		   (html
+                    [:h2 "Tags"]
 		    (map (fn[t]
 			   (let [[tag posts] t] 
 			     [:h4 [:a {:name tag} tag]
@@ -140,16 +141,19 @@
 
 (defn pager
   "Return previous, next navigation links."
-  [page max-index]
-  (let [older [:div {:class "pager-left"}
+  [page max-index posts-per-page]
+  (let [count-total (count (list-files :posts))
+        older [:div {:class "pager-left"}
 	       [:a {:href (str "/latest-posts/" (- page 1) "/")} 
 		"&laquo; Older Entries"]]
 	newer [:div {:class "pager-right"}
 	       [:a {:href (str "/latest-posts/" (+ page 1) "/")} 
 		"Newer Entries &raquo;"]]]
-    (cond (= page max-index) (list older)
-	  (= page 0) (list newer)
-	  :default (list older newer))))
+    (cond
+     (< count-total posts-per-page) nil
+     (= page max-index) (list older)
+     (= page 0) (list newer)
+     :default (list older newer))))
 
 (defn snippet
   "Render a post for display in index pages."
@@ -165,8 +169,9 @@
 (defn create-latest-posts 
   "Create and write latest post pages."
   []
-  (let [posts (partition (:posts-per-page (config))
-			 (:posts-per-page (config))
+  (let [posts-per-page (:posts-per-page (config))
+        posts (partition posts-per-page
+			 posts-per-page
 			 []
 			 (reverse (list-files :posts)))
 	pages (partition 2 (interleave (reverse posts) (range)))
@@ -178,7 +183,7 @@
     	[{:title (:site-title (config))
 	  :description (:site-description (config))
     	  :template (:default-template (config))}
-    	 (html (list (map #(snippet %) posts) (pager page max-index)))])))))
+    	 (html (list (map #(snippet %) posts) (pager page max-index posts-per-page)))])))))
 
 ;;
 ;; Create Archive Pages.

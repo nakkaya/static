@@ -67,7 +67,25 @@ tags: 6662
 published: false
 ---
 
-Should be skipped..."))
+Should be skipped...")
+
+(spit 
+   (File. "resources/posts/2050-06-06-dummy-future-post-6.html")
+   "---
+title: org-jekyll entry
+on: <2050-06-06 Sat>
+template: temp.clj
+extra: first
+CATEGORY: test
+---
+
+<div id=\"outline-container-1\" class=\"outline-2\">
+<h2 id=\"sec-1\"><a href=\"test.html\">First blog entry </a></h2>
+<div class=\"outline-text-2\" id=\"text-1\">
+
+<p>With some content in the first entry. 
+</p></div>
+</div>"))
 
 (defn- create-template []
   (spit (File. "resources/templates/temp.clj") "content"))

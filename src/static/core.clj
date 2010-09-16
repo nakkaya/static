@@ -49,7 +49,7 @@
   "Process site pages."
   []
   (doseq [f (list-files :site)]
-    (let [[metadata content] (read-markdown f)]
+    (let [[metadata content] (read-doc f)]
       (write-out-dir
        (site-url f)
        (template [(assoc metadata :type :site) content])))))
@@ -61,7 +61,7 @@
 (defn post-xml
   "Create RSS item node."
   [file]
-  (let [[metadata content] (read-markdown file)]
+  (let [[metadata content] (read-doc file)]
     [:item 
      [:title (:title metadata)]
      [:link  (str (URL. (URL. (:site-url (config))) (post-url file)))]
@@ -105,8 +105,8 @@
   "Create a map of tags and posts contining them. {tag1 => [url1 url2..]}"
   []
   (reduce 
-   (fn[h v] 
-     (let [[metadata _] (read-markdown v)
+   (fn[h v]
+     (let [[metadata _] (read-doc v)
 	   info [(post-url v) (:title metadata)]
 	   tags (.split (:tags metadata) " ")]
        (reduce 
@@ -116,7 +116,8 @@
 	      (assoc m tag [info])
 	      (assoc m tag (conj (m tag) info)))))
 	h (partition 2 (interleave tags (repeat info))))))
-   (sorted-map) (list-files :posts)))
+   (sorted-map)   
+   (filter #(not (nil? (:tags (first (read-doc %))))) (list-files :posts))))
 
 (defn create-tags 
   "Create and write tags page."
@@ -158,7 +159,7 @@
 (defn snippet
   "Render a post for display in index pages."
   [f]
-  (let [[metadata content] (read-markdown f)]
+  (let [[metadata content] (read-doc f)]
     [:div [:h2 [:a {:href (post-url f)} (:title metadata)]]
      [:p {:class "publish_date"}  
       (parse-date "yyyy-MM-dd" "dd MMM yyyy" 
@@ -232,7 +233,7 @@
   "Create and write post pages."
   []
   (doseq [f (list-files :posts)]
-    (let [[metadata content] (read-markdown f)
+    (let [[metadata content] (read-doc f)
 	  out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
 			   (FilenameUtils/getBaseName (str f)) (range 3))]
       (write-out-dir 

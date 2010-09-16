@@ -17,7 +17,7 @@
 (use-fixtures :once dummy-fs-fixture)
 
 (deftest test-markdown
-  (let [[metadata content] (read-markdown "resources/site/dummy.markdown")] 
+  (let [[metadata content] (read-doc "resources/site/dummy.markdown")] 
     (is (= "unit test"  (:tags metadata)))
     (is (= "some dummy desc" (:description metadata)))
     (is (= "dummy content" (:title metadata)))
@@ -25,7 +25,7 @@
 	   (re-find #"Some dummy file for unit testing." content)))))
 
 (deftest test-io
-  (is (= (count (list-files :posts)) 4)))
+  (is (= (count (list-files :posts)) 5)))
 
 (deftest test-rss-feed
   (let [rss (File. "html/rss-feed")

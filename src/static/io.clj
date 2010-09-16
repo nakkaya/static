@@ -2,7 +2,7 @@
   (:use static.config :reload-all)
   (:import (com.petebevin.markdown MarkdownProcessor)
 	   (java.io File)
-	   (org.apache.commons.io FileUtils)))
+	   (org.apache.commons.io FileUtils FilenameUtils)))
 
 (defn- markdown [txt] (.markdown (MarkdownProcessor.) txt))
 
@@ -16,12 +16,23 @@
 	      (assoc h key v)))
 	  {} (re-seq #"([^:]+): (.+)(\n|$)" metadata)))
 
-(def read-markdown 
+(defn- read-markdown [file]
+  (let [[metadata content] 
+	(split-file (slurp file :encoding (:encoding (config))))]
+    [(prepare-metadata metadata) (markdown content)]))
+
+(defn- read-html [file]
+  (let [[metadata content] 
+	(split-file (slurp file :encoding (:encoding (config))))]
+    [(prepare-metadata metadata) content]))
+
+(def read-doc
      (memoize
-      (fn [file]
-	(let [[metadata content] 
-	      (split-file (slurp file :encoding (:encoding (config))))]
-	  [(prepare-metadata metadata) (markdown content)]))))
+      (fn [f]
+	(let [extension (FilenameUtils/getExtension (str f))]
+	  (cond (= extension "markdown") (read-markdown f)
+		(= extension "html") (read-html f)
+		:default (throw (Exception. "Unknown Extension.")))))))
 
 (defn dir [dir]
   (cond (= dir :templates) (str (:in-dir (config)) "templates/")
@@ -34,12 +45,13 @@
   (let [d (File. (dir d))] 
     (if (.isDirectory d)
       (filter
-       #(let [[metadata _] (read-markdown %)
+       #(let [[metadata _] (read-doc %)
 	      published? (:published metadata)]
 	  (if (or (nil? published?)
 		  (= published? "true"))
 	    true false))
-       (FileUtils/listFiles d (into-array ["markdown"]) true)) [] )))
+       (FileUtils/listFiles d (into-array ["markdown"
+					   "html"]) true)) [] )))
 
 (def read-template
      (memoize

@@ -13,7 +13,13 @@
 (def config
      (memoize
       #(try 
-	(apply hash-map (read-string (slurp (File. "config.clj"))))
+	 (let [config (apply hash-map (read-string (slurp (File. "config.clj"))))]
+	   ;;if emacs key is set make sure executable exists.
+	   (when (:emacs config)
+	     (if (not (.exists (File. (:emacs config))))
+	       (do (error "Path to Emacs not valid.")
+		   (System/exit 0))))
+	   config)
 	(catch Exception e (do 
 			     (info "Configuration not found using defaults.")
 			     {:in-dir "resources/"

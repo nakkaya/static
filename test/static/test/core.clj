@@ -24,8 +24,14 @@
     (is (= "Some dummy file for unit testing."
 	   (re-find #"Some dummy file for unit testing." content)))))
 
+(deftest test-org
+  (let [[metadata content] (read-doc (File. "resources/posts/2050-07-07-dummy-future-post-7.org"))] 
+    (is (= "org-mode org-babel"  (:tags metadata)))
+    (is (= "Dummy org-mode post" (:title metadata)))
+    (is (= "Sum 1 and 2" (re-find #"Sum 1 and 2" content)))))
+
 (deftest test-io
-  (is (= (count (list-files :posts)) 5)))
+  (is (= (count (list-files :posts)) 6)))
 
 (deftest test-rss-feed
   (let [rss (File. "html/rss-feed")

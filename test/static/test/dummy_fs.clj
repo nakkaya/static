@@ -85,7 +85,23 @@ CATEGORY: test
 
 <p>With some content in the first entry. 
 </p></div>
-</div>"))
+</div>")
+
+(spit 
+   (File. "resources/posts/2050-07-07-dummy-future-post-7.org")
+   "#+title: Dummy org-mode post
+#+tags: org-mode org-babel
+#+template: temp.clj
+
+Sum 1 and 2
+
+#+BEGIN_SRC clojure
+
+(+ 1 2)
+
+#+END_SRC
+
+"))
 
 (defn- create-template []
   (spit (File. "resources/templates/temp.clj") "content"))
@@ -104,7 +120,8 @@ CATEGORY: test
  :default-template \"temp.clj\"
  :encoding \"UTF-8\"
  :posts-per-page 2
- :blog-as-index true]"))
+ :blog-as-index true
+ :emacs \"/Users/nakkaya/Dropbox/Applications/Emacs.app/Contents/MacOS/Emacs\"]"))
 
 (defn create-dummy-fs []
   (create-resources)

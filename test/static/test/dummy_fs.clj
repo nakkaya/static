@@ -121,7 +121,7 @@ Sum 1 and 2
  :encoding \"UTF-8\"
  :posts-per-page 2
  :blog-as-index true
- :emacs \"/Users/nakkaya/Dropbox/Applications/Emacs.app/Contents/MacOS/Emacs\"]"))
+ :emacs \"/Applications/Emacs.app/Contents/MacOS/Emacs\"]"))
 
 (defn create-dummy-fs []
   (create-resources)

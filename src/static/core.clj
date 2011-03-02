@@ -308,4 +308,5 @@
 			       (:deploy-dir (config)))
 	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))
-	  :default (println "Use -h for options."))))
+	  :default (println "Use -h for options.")))
+  (shutdown-agents))

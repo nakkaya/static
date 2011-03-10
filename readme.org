@@ -59,8 +59,7 @@ Contains a vector of configuration options.
 -  :encoding - Encoding to use for read write operations.
 -  :posts-per-page - Number of posts in latest post pages.
 -  :blog-as-index - If true use blog as index.
--  :emacs - path to emacs (for .org files?)
-
+-  :emacs - path to emacs if you want to render .org files.
 -  :host - remote host to deploy to.
 -  :user - remote username
 -  :port - Remote SSH port

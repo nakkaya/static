@@ -13,11 +13,9 @@ Static requires the [[https://github.com/technomancy/leiningen][leiningen]] buil
 
 #+BEGIN_EXAMPLE 
   lein deps
+  lein uberjar
 #+END_EXAMPLE
 
-#+begin_src 
-  lein uberjar
-#+end_src
 
 ** Usage
 

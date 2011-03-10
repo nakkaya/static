@@ -12,8 +12,8 @@ Static can parse org-mode and markdown files.
 Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can build Static with the following commands from within the project directory structure:
 
 #+BEGIN_EXAMPLE 
-  lein deps
-  lein uberjar
+  $ lein deps
+  $ lein uberjar
 #+END_EXAMPLE
 
 

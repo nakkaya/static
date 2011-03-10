@@ -3,6 +3,10 @@
 Static is a simple static site generator written in Clojure. For a
 sample site build using static see [[nakkaya.com][http://nakkaya.com]]
 
+** Features
+
+Static can parse org-mode and markdown files. 
+
 ** Dependencies 
 
 Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can build Static with the following commands from within the project directory structure:

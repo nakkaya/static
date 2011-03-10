@@ -2,14 +2,6 @@
   (:use [clojure.contrib.logging])
   (:import (java.io File)))
 
-(let [logger (impl-get-log "")]
-  (doseq [handler (.getHandlers logger)]
-    (. handler setFormatter 
-       (proxy [java.util.logging.Formatter] [] 
-	 (format 
-	  [record] 
-	  (str (.getLevel record) ": " (.getMessage record) "\n"))))))
-
 (def config
      (memoize
       #(try 

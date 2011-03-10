@@ -3,6 +3,18 @@
 Static is a simple static site generator written in Clojure. For a
 sample site build using static see [[nakkaya.com][http://nakkaya.com]]
 
+** Dependencies 
+
+Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can build Static with the following commands from within the project directory structure:
+
+#+begin_src sh
+  lein deps
+#+end_src
+
+#+begin_src sh
+  lein uberjar
+#+end_src
+
 ** Usage
 
 Creating a static site usually involves the following,
@@ -33,6 +45,7 @@ Contains a vector of configuration options.
 -  :encoding - Encoding to use for read write operations.
 -  :posts-per-page - Number of posts in latest post pages.
 -  :blog-as-index - If true use blog as index.
+-  :emacs - path to emacs (for .org files?)
 
 -  :host - remote host to deploy to.
 -  :user - remote username
@@ -67,6 +80,14 @@ config.clj.
 
 #+BEGIN_EXAMPLE
     java -jar static.jar -b
+#+END_EXAMPLE
+
+*** Testing the site
+
+You can test the site locally using jetty, which will launch on http://localhost:8080. 
+
+#+BEGIN_EXAMPLE
+    java -jar static.jar -j
 #+END_EXAMPLE
 
 *** Deploying the site

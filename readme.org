@@ -28,11 +28,23 @@ Creating a static site usually involves the following,
 -  Run your site locally to see how it looks
 -  Deploy your site
 
-A basic static site usually looks something like this: . |-- config.clj
-=-- resources          |-- posts          |   |-- 2009-04-17-back-up-and-restore-a-mysql-database.markdown          |   |-- 2010-02-10-a-simple-clojure-irc-client.markdown          |=--
-2010-08-02-using-clojure-contrib-generic-interfaces.markdown |-- public
-| =-- 404.html          |-- site          |=-- index.markdown
-=-- templates=-- default.clj
+A basic static site usually looks something like this:
+
+#+BEGIN_EXAMPLE
+ .
+ |-- config.clj
+ `-- resources
+     |-- posts
+     |   |-- 2009-04-17-back-up-and-restore-a-mysql-database.markdown
+     |   |-- 2010-02-10-a-simple-clojure-irc-client.markdown
+     |   `-- 2010-08-02-using-clojure-contrib-generic-interfaces.markdown
+     |-- public
+     |   `-- 404.html
+     |-- site
+     |   `-- index.markdown
+     `-- templates
+         `-- default.clj
+#+END_EXAMPLE
 
 An overview of what each of these does:
 

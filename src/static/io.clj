@@ -47,7 +47,7 @@
 		(= extension "html") (read-html f)
 		:default (throw (Exception. "Unknown Extension.")))))))
 
-(defn dir [dir]
+(defn dir-path [dir]
   (cond (= dir :templates) (str (:in-dir (config)) "templates/")
 	(= dir :public) (str (:in-dir (config)) "public/")
 	(= dir :site) (str (:in-dir (config)) "site/")
@@ -55,7 +55,7 @@
 	:default (throw (Exception. "Unknown Directory."))))
 
 (defn list-files [d]
-  (let [d (File. (dir d))] 
+  (let [d (File. (dir-path d))] 
     (if (.isDirectory d)
       (sort
        (filter
@@ -71,7 +71,7 @@
 (def read-template
      (memoize
       (fn [template]
-	(-> (str (dir :templates) template)
+	(-> (str (dir-path :templates) template)
 	    (File.) 
 	    (slurp :encoding (:encoding (config)))
 	    read-string))))

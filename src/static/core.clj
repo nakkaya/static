@@ -30,7 +30,7 @@
 
 (defn site-url [f]
   (-> (str f)
-      (.replaceAll (dir :site) "")
+      (.replaceAll (dir-path :site) "")
       (FilenameUtils/removeExtension)
       (str ".html")))
 
@@ -70,7 +70,7 @@
 (defn create-rss 
   "Create RSS feed."
   []
-  (let [in-dir (File. (dir :posts))
+  (let [in-dir (File. (dir-path :posts))
 	posts (take 10 (reverse (list-files :posts)))]
     (write-out-dir "rss-feed"
 		   (with-out-str
@@ -244,7 +244,7 @@
 (defn process-public 
   "Copy public from in-dir to out-dir."
   []
-  (let [in-dir (File. (dir :public))
+  (let [in-dir (File. (dir-path :public))
 	out-dir (File. (:out-dir (config)))]
     (doseq [f (map #(File. in-dir %) (.list in-dir))]
       (if (.isFile f)
@@ -259,7 +259,7 @@
     (.mkdir))
   (process-site)
   (process-public)
-  (if (pos? (-> (dir :posts) (File.) .list count))
+  (if (pos? (-> (dir-path :posts) (File.) .list count))
     (do 
       (process-posts)
       (create-rss)

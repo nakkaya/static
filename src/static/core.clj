@@ -193,13 +193,14 @@
 (defn post-count-by-mount 
   "Create a map of month to post count {month => count}"
   []
-  (reduce (fn [h v]
-	    (let  [date (re-find #"\d*-\d*" 
-				 (FilenameUtils/getBaseName (str v)))]
-	      (if (nil? (h date))
-		(assoc h date 1)
-		(assoc h date (+ 1 (h date)))))) 
-	  {} (list-files :posts)))
+  (reverse (sort-by first
+                    (reduce (fn [h v]
+                              (let  [date (re-find #"\d*-\d*" 
+                                                   (FilenameUtils/getBaseName (str v)))]
+                                (if (nil? (h date))
+                                  (assoc h date 1)
+                                  (assoc h date (+ 1 (h date)))))) 
+                            {} (list-files :posts)))))
 
 (defn create-archives 
   "Create and write archive pages."

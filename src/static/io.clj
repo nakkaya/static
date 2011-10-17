@@ -35,7 +35,10 @@
   (let [metadata (prepare-metadata (slurp file :encoding (:encoding (config))))
 	content (:out (sh (:emacs (config))
 			  "-batch" "-visit" (.getAbsolutePath file) "-eval"
-			  "(princ (org-no-properties (org-export-as-html nil nil nil 'string t nil)))"))]
+			  (str
+                           "(progn "
+                           (apply str (map second (:emacs-eval (config))))
+                           " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))")))]
     [metadata content]))
 
 (def read-doc

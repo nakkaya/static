@@ -193,14 +193,15 @@
 (defn post-count-by-mount 
   "Create a map of month to post count {month => count}"
   []
-  (reverse (sort-by first
-                    (reduce (fn [h v]
-                              (let  [date (re-find #"\d*-\d*" 
-                                                   (FilenameUtils/getBaseName (str v)))]
-                                (if (nil? (h date))
-                                  (assoc h date 1)
-                                  (assoc h date (+ 1 (h date)))))) 
-                            {} (list-files :posts)))))
+  (->> (list-files :posts)
+       (reduce (fn [h v]
+                 (let  [date (re-find #"\d*-\d*" 
+                                      (FilenameUtils/getBaseName (str v)))]
+                   (if (nil? (h date))
+                     (assoc h date 1)
+                     (assoc h date (+ 1 (h date)))))) {})
+       (sort-by first)
+       reverse))
 
 (defn create-archives 
   "Create and write archive pages."
@@ -214,11 +215,13 @@
       (list [:h2 "Archives"]
 	    [:ul 
 	     (map 
-	      #(let [url (str "/archives/" (.replace (first %) "-" "/") "/")
-		     date (parse-date "yyyy-MM" "MMMM yyyy" (first %))
-		     count (str " (" (second %) ")")]
-		 [:li [:a {:href url} date] count]) 
+	      (fn [[mount count]]
+                [:li [:a
+                      {:href (str "/archives/" (.replace mount "-" "/") "/")}
+                      (parse-date "yyyy-MM" "MMMM yyyy" mount)]
+                 (str " (" count ")")])
 	      (post-count-by-mount))]))]))
+  
   ;;create a page for each month.
   (doseq [month (keys (post-count-by-mount))] 
     (let [posts (->> (list-files :posts)
@@ -287,9 +290,6 @@
       (if-let [mimetype (mime-types (re-find #"\..+$" (:uri req)))] 
 	(merge f {:headers {"Content-Type" mimetype}}) 
 	f))))
-
-;;(serve-static {:uri "/code/clojure/robocup.clj"})
-;;(serve-static {:uri "/index.html"})
 
 (defn -main [& args]
   (with-command-line args

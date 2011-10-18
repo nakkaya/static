@@ -221,9 +221,10 @@
 	      (post-count-by-mount))]))]))
   ;;create a page for each month.
   (doseq [month (keys (post-count-by-mount))] 
-    (let [posts (filter #(.startsWith 
-			  (FilenameUtils/getBaseName (str %)) month)
-			(list-files :posts))]
+    (let [posts (->> (list-files :posts)
+                     (filter #(.startsWith 
+                               (FilenameUtils/getBaseName (str %)) month))
+                     reverse)]
       (write-out-dir
        (str "archives/" (.replace month "-" "/") "/index.html")
        (template

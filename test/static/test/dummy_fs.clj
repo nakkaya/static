@@ -17,7 +17,11 @@ description: some dummy desc
 tags: unit test
 ---
 
-Some dummy file for unit testing."))
+Some dummy file for unit testing.")
+  
+(spit (File. "resources/site/dummy_clj.clj")
+	"{:title \"Dummy Clj File\"}
+[:h3 \"Dummy Clj Content\"]"))
 
 (defn- create-dummy-posts []
   (spit 

@@ -30,6 +30,12 @@
     (is (= "Dummy org-mode post" (:title metadata)))
     (is (= "Sum 1 and 2" (re-find #"Sum 1 and 2" content)))))
 
+(deftest test-clj
+  (let [[metadata content] (read-doc (File. "resources/site/dummy_clj.clj"))] 
+    (is (= "Dummy Clj File" (:title metadata)))
+    (is (= "Dummy Clj Content" (re-find #"Dummy Clj Content" content)))
+    (is (= "<h3>" (re-find #"<h3>" content)))))
+
 (deftest test-io
   (is (= (count (list-files :posts)) 6)))
 

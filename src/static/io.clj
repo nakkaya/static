@@ -2,6 +2,7 @@
   (:use [clojure.contrib.logging])
   (:use [clojure.java.shell :only [sh]])
   (:use static.config :reload-all)
+  (:use hiccup.core)
   (:import (com.petebevin.markdown MarkdownProcessor)
 	   (java.io File)
 	   (org.apache.commons.io FileUtils FilenameUtils)))
@@ -41,6 +42,11 @@
                            " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))")))]
     [metadata content]))
 
+(defn- read-clj [file]
+  (let [[metadata content] (read-string
+                              (str \( (slurp file :encoding (:encoding (config))) \)))]
+    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval html))]))
+
 (def read-doc
      (memoize
       (fn [f]
@@ -48,6 +54,7 @@
 	  (cond (= extension "markdown") (read-markdown f)
 		(= extension "org") (read-org f)
 		(= extension "html") (read-html f)
+                (= extension "clj") (read-clj f)
 		:default (throw (Exception. "Unknown Extension.")))))))
 
 (defn dir-path [dir]
@@ -68,6 +75,7 @@
 		   (= published? "true"))
 	     true false))
 	(FileUtils/listFiles d (into-array ["markdown"
+                                            "clj"
 					    "org"
 					    "html"]) true))) [] )))
 

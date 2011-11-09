@@ -25,6 +25,15 @@
              [record]
              (str "[+] " (.getLevel record) ": " (.getMessage record) "\n")))))))
 
+(defmacro log-time-elapsed
+  "Evaluates expr and logs the time it took.  Returns the value of expr."
+  {:added "1.0"}
+  [msg & expr]
+  `(let [start# (. System (currentTimeMillis))
+         ret# (do ~@expr)]
+     (info (str ~msg " " (/ (double (- (. System (currentTimeMillis)) start#)) 1000.0) " secs"))
+     ret#))
+
 (defn parse-date 
   "Format date from in spec to out spec."
   [in out date]
@@ -313,7 +322,7 @@
         (set!-config :out-dir loc)
         (info (str "Using tmp location: " (:out-dir (config))))))
     
-    (cond build? (info (with-out-str (time (create))))
+    (cond build? (log-time-elapsed "Build took " (create))
 	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))
 	  :default (println "Use -h for options.")))

@@ -17,6 +17,15 @@
 	   (org.apache.commons.io FileUtils FilenameUtils)
 	   (java.text SimpleDateFormat)))
 
+(defn setup-logging []
+  (let [logger (impl-get-log "")]
+    (doseq [handler (.getHandlers logger)]
+      (. handler setFormatter
+         (proxy [java.util.logging.Formatter] []
+           (format
+             [record]
+             (str "[+] " (.getLevel record) ": " (.getMessage record) "\n")))))))
+
 (defn parse-date 
   "Format date from in spec to out spec."
   [in out date]
@@ -298,6 +307,7 @@
      [ssh? s?    "Deploy using SFTP."]
      [rsync? r?  "Deploy using rsync."]
      [jetty? j?  "Run Jetty."]]
+    (setup-logging)
     (cond build? (info (with-out-str (time (create))))
 	  ssh? (deploy-sftp (:out-dir (config)) 
 			    (:host (config)) 

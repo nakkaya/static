@@ -11,7 +11,6 @@
   (:use hiccup.core)
   (:use static.config :reload-all)
   (:use static.io :reload-all)
-  (:use static.deploy :reload-all)
   (:import (java.io File)
 	   (java.net URL)
 	   (org.apache.commons.io FileUtils FilenameUtils)
@@ -304,20 +303,9 @@
   (with-command-line args
     "Static"
     [[build? b? "Build Site."]
-     [ssh? s?    "Deploy using SFTP."]
-     [rsync? r?  "Deploy using rsync."]
      [jetty? j?  "Run Jetty."]]
     (setup-logging)
     (cond build? (info (with-out-str (time (create))))
-	  ssh? (deploy-sftp (:out-dir (config)) 
-			    (:host (config)) 
-			    (:port (config))
-			    (:user (config))
-			    (:deploy-dir (config)))
-	  rsync? (deploy-rsync (:out-dir (config)) 
-			       (:host (config)) 
-			       (:user (config))
-			       (:deploy-dir (config)))
 	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))
 	  :default (println "Use -h for options.")))

@@ -8,4 +8,6 @@
 		 [clj-ssh "0.2.0-SNAPSHOT"]
 		 [ring/ring-core "0.2.5"]
 		 [ring/ring-jetty-adapter "0.2.5"]]
-  :main static.core)
+  :main static.core
+  :jar-name "static.jar"
+  :uberjar-name "static-app.jar")

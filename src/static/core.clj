@@ -303,8 +303,16 @@
   (with-command-line args
     "Static"
     [[build? b? "Build Site."]
+     [tmp-loc? tmp? "Use tmp location override :out-dir"]
      [jetty? j?  "Run Jetty."]]
     (setup-logging)
+
+    (when tmp-loc?
+      (config) ;;load config
+      (let [loc (str (System/getProperty "java.io.tmpdir") "static/")]
+        (set!-config :out-dir loc)
+        (info (str "Using tmp location: " (:out-dir (config))))))
+    
     (cond build? (info (with-out-str (time (create))))
 	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))

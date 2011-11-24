@@ -9,7 +9,9 @@ Static can parse org-mode and markdown files.
 
 ** Dependencies 
 
-Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can build Static with the following commands from within the project directory structure:
+Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can
+build Static with the following commands from within the project
+directory structure:
 
 #+BEGIN_EXAMPLE 
   $ lein deps
@@ -60,10 +62,7 @@ Contains a vector of configuration options.
 -  :posts-per-page - Number of posts in latest post pages.
 -  :blog-as-index - If true use blog as index.
 -  :emacs - path to emacs if you want to render .org files.
--  :host - remote host to deploy to.
--  :user - remote username
--  :port - Remote SSH port
--  :deploy-dir - Remote directory to deploy to.
+-  :emacs-eval - elisp code to be evaluated on the emacs process
 
 *** posts/
 
@@ -101,20 +100,6 @@ You can test the site locally using jetty, which will launch on http://localhost
 
 #+BEGIN_EXAMPLE
     java -jar static.jar -j
-#+END_EXAMPLE
-
-*** Deploying the site
-
-**** SFTP
-
-#+BEGIN_EXAMPLE
-    java -jar static.jar --ssh
-#+END_EXAMPLE
-
-**** RSYNC
-
-#+BEGIN_EXAMPLE
-    java -jar static.jar --rsync
 #+END_EXAMPLE
 
 ** License

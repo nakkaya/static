@@ -51,7 +51,9 @@
      (memoize
       (fn [f]
 	(let [extension (FilenameUtils/getExtension (str f))]
-	  (cond (= extension "markdown") (read-markdown f)
+	  (cond (or (= extension "markdown") (= extension "md"))
+                    (read-markdown f)
+                (= extension "md") (read-markdown f)
 		(= extension "org") (read-org f)
 		(= extension "html") (read-html f)
                 (= extension "clj") (read-clj f)
@@ -75,6 +77,7 @@
 		   (= published? "true"))
 	     true false))
 	(FileUtils/listFiles d (into-array ["markdown"
+                                            "md"
                                             "clj"
 					    "org"
 					    "html"]) true))) [] )))

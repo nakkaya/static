@@ -67,7 +67,7 @@ Contains a vector of configuration options.
 *** posts/
 
 Folder containing posts, the format of these files are important, as
-named as /YEAR-MONTH-DATE-title.MAKDOWN/.
+named as /YEAR-MONTH-DATE-title.MARKDOWN/.
 
 *** public/
 

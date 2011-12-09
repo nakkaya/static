@@ -10,22 +10,22 @@
 (defn- markdown [txt] (.markdown (MarkdownProcessor.) txt))
 
 (defn- split-file [content]
-  (let [idx (.indexOf content "---" 4)] 
+  (let [idx (.indexOf content "---" 4)]
     [(.substring content 4 idx) (.substring content (+ 3 idx))]))
 
 (defn- prepare-metadata [metadata]
-  (reduce (fn [h [_ k v]] 
+  (reduce (fn [h [_ k v]]
 	    (let [key (keyword k)]
 	      (assoc h key v)))
 	  {} (re-seq #"([^:#\+]+): (.+)(\n|$)" metadata)))
 
 (defn- read-markdown [file]
-  (let [[metadata content] 
+  (let [[metadata content]
 	(split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata) (markdown content)]))
 
 (defn- read-html [file]
-  (let [[metadata content] 
+  (let [[metadata content]
 	(split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata) content]))
 
@@ -65,7 +65,7 @@
 	:default (throw (Exception. "Unknown Directory."))))
 
 (defn list-files [d]
-  (let [d (File. (dir-path d))] 
+  (let [d (File. (dir-path d))]
     (if (.isDirectory d)
       (sort
        (filter
@@ -83,10 +83,10 @@
      (memoize
       (fn [template]
 	(-> (str (dir-path :templates) template)
-	    (File.) 
+	    (File.)
 	    (slurp :encoding (:encoding (config)))
 	    read-string))))
 
 (defn write-out-dir [file str]
-  (FileUtils/writeStringToFile 
+  (FileUtils/writeStringToFile
    (File. (:out-dir (config)) file) str (:encoding (config))))

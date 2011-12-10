@@ -5,15 +5,15 @@ sample site build using static see [[nakkaya.com][http://nakkaya.com]]
 
 ** Features
 
-Static can parse org-mode and markdown files. 
+Static can parse org-mode and markdown files.
 
-** Dependencies 
+** Dependencies
 
 Static requires the [[https://github.com/technomancy/leiningen][leiningen]] build tool. Once installed, you can
 build Static with the following commands from within the project
 directory structure:
 
-#+BEGIN_EXAMPLE 
+#+BEGIN_EXAMPLE
   $ lein deps
   $ lein uberjar
 #+END_EXAMPLE
@@ -54,7 +54,10 @@ Contains a vector of configuration options.
 
 -  :site-title - Title of the site.
 -  :site-description - Description of the site.
--  :site-url - URL of the site
+-  :site-url - URL of the site.
+-  :author-name - Name of the author.
+-  :author-email - E-mail address of the author.
+-  :copyright-year - Year the pages were created/copyrighted.
 -  :in-dir - Directory containing site content by default /resources//
 -  :out-dir - Directory to save compiled files.
 -  :default-template - Default template to use.
@@ -62,7 +65,13 @@ Contains a vector of configuration options.
 -  :posts-per-page - Number of posts in latest post pages.
 -  :blog-as-index - If true use blog as index.
 -  :emacs - path to emacs if you want to render .org files.
--  :emacs-eval - elisp code to be evaluated on the emacs process
+-  :emacs-eval - elisp code to be evaluated on the emacs process.
+
+The variables can later be reused (for example in your default template) as:
+
+#+BEGIN_SRC clojure
+	(:author-name (static.config/config))
+#+END_SRC
 
 *** posts/
 
@@ -91,19 +100,19 @@ config.clj.
 *** Building the site
 
 #+BEGIN_EXAMPLE
-    java -jar static.jar -b
+    java -jar static-app.jar -b
 #+END_EXAMPLE
 
 *** Testing the site
 
-You can test the site locally using jetty, which will launch on http://localhost:8080. 
+You can test the site locally using jetty, which will launch on http://localhost:8080.
 
 #+BEGIN_EXAMPLE
-    java -jar static.jar -j
+    java -jar static-app.jar -j
 #+END_EXAMPLE
 
 ** License
 
-Copyright (C) 2010
+Copyright (C) 2010, 2011
 
 Distributed under the Eclipse Public License, the same as Clojure.

@@ -95,6 +95,6 @@
    (File. (:out-dir (config)) file) str (:encoding (config))))
 
 (defn deploy-rsync [rsync out-dir host user deploy-dir]
-  (let [cmd [rsync "-avz" "--delete" "-e" "ssh"
+  (let [cmd [rsync "-avz" "--delete" "--checksum" "-e" "ssh"
              out-dir (str user "@" host ":" deploy-dir)]]
     (info (:out (apply sh cmd)))))

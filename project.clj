@@ -1,6 +1,6 @@
 (defproject static "1.0.0-SNAPSHOT"
   :description "Simple static site generator."
-  :dependencies [[org.clojure/clojure "1.2.0"]
+  :dependencies [[org.clojure/clojure "1.2.1"]
 		 [org.clojure/clojure-contrib "1.2.0"]
 		 [org.clojars.paraseba/hiccup "0.2.3"]
 		 [org.markdownj/markdownj "0.3.0-1.0.2b4"]

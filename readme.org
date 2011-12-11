@@ -66,6 +66,10 @@ Contains a vector of configuration options.
 -  :blog-as-index - If true use blog as index.
 -  :emacs - path to emacs if you want to render .org files.
 -  :emacs-eval - elisp code to be evaluated on the emacs process.
+-  :host - remote host to deploy to.
+-  :user - remote username
+-  :deploy-dir - Remote directory to deploy to.
+-  :rsync - path to rsync if you want to deploy with rsync.
 
 The variables can later be reused (for example in your default template) as:
 
@@ -109,6 +113,14 @@ You can test the site locally using jetty, which will launch on http://localhost
 
 #+BEGIN_EXAMPLE
     java -jar static-app.jar -j
+#+END_EXAMPLE
+
+*** Deploying the site
+
+**** RSYNC
+
+#+BEGIN_EXAMPLE
+    $ java -jar static-app.jar --rsync
 #+END_EXAMPLE
 
 ** License

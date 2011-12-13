@@ -112,18 +112,18 @@ header placed at the top of the file,
 
 **** org-mode
 
-#+begin_example
+#+BEGIN_EXAMPLE
   ,#+title: Blogging Like a Hacker
   ,#+tags: clojure
-#+end_example
+#+END_EXAMPLE
 
 **** Markdown
 
 #+begin_example
-  ,---
+  ---
   template: temp-en.clj
   title: Blogging Like a Hacker
-  ,---
+  ---
 #+end_example
 
 **** Clojure

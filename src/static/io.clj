@@ -28,17 +28,18 @@
   (let [[metadata content]
 	(split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata) content]))
-
+  
 (defn- read-org [file]
   (if (not (:emacs (config)))
     (do (error "Path to Emacs is required for org files.")
 	(System/exit 0)))
   (let [metadata (prepare-metadata (slurp file :encoding (:encoding (config))))
 	content (:out (sh (:emacs (config))
-			  "-batch" "-visit" (.getAbsolutePath file) "-eval"
+			  "-batch" "-eval"
 			  (str
                            "(progn "
                            (apply str (map second (:emacs-eval (config))))
+                           " (find-file \"" (.getAbsolutePath file) "\") "
                            " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))")))]
     [metadata content]))
 

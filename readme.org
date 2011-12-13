@@ -119,18 +119,18 @@ header placed at the top of the file,
 
 **** Markdown
 
-#+begin_example
+#+BEGIN_EXAMPLE
   ---
   template: temp-en.clj
   title: Blogging Like a Hacker
   ---
-#+end_example
+#+END_EXAMPLE
 
 **** Clojure
 
-#+begin_src clojure
+#+BEGIN_SRC clojure
   {:title "Blogging Like a Hacker"}
-#+end_src
+#+END_SRC
 
 *** Page/Post Settings
 

@@ -327,6 +327,6 @@
 	  jetty? (do (future (run-jetty serve-static {:port 8080}))
 		     (browse-url "http://127.0.0.1:8080"))
           rsync? (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
-                   (deploy-rsync rsync out-dir host user deploy-rsync))
+                   (deploy-rsync rsync out-dir host user deploy-dir))
 	  :default (println "Use -h for options.")))
   (shutdown-agents))

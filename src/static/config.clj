@@ -29,3 +29,4 @@
 
 (defn set!-config [k v]
   (alter-var-root (find-var 'static.config/config) (fn [c] #(identity (assoc (c) k v)))))
+  

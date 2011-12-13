@@ -251,6 +251,18 @@
 	[{:title "Archives" :template (:default-template (config))}
 	 (html (map snippet posts))])))))
 
+(defn create-alias 
+  "Create redirect pages for a post"
+  [file]
+  (when-let [aliases (-> (read-doc file) first :alias)]
+    (doseq [alias (read-string aliases)]
+      (write-out-dir
+       alias
+       (html [:html
+              [:head
+               [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]
+               [:meta {:http-equiv "refresh" :content (str "0;url=" alias)}]]])))))
+
 (defn process-posts 
   "Create and write post pages."
   []
@@ -273,6 +285,14 @@
 	(FileUtils/copyFileToDirectory f out-dir)
 	(FileUtils/copyDirectoryToDirectory f out-dir)))))
 
+(defn process-aliases
+  "Create redirect pages."
+  []
+  (doseq [post (list-files :posts)]
+    (create-alias post))
+  (doseq [site (list-files :site)]
+    (create-alias site)))
+
 (defn create 
   "Build Site."
   [] 
@@ -288,6 +308,7 @@
       (create-tags)
       (create-archives)
       (create-sitemap)
+      (process-aliases)
       (when (:blog-as-index (config))
         (create-latest-posts)
 	(let [max (apply max (map read-string (-> (:out-dir (config))

@@ -37,7 +37,9 @@
     (is (= "<h3>" (re-find #"<h3>" content)))))
 
 (deftest test-io
-  (is (= (count (list-files :posts)) 6)))
+  (is (= (count (list-files :posts)) 6))
+  (is (.exists (File. "html/first-alias/index.html")))
+  (is (.exists (File. "html/second-alias/index.html"))))
 
 (deftest test-rss-feed
   (let [rss (File. "html/rss-feed")

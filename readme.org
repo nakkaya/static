@@ -139,7 +139,11 @@ header placed at the top of the file,
    placed in the *templates* directory.
  - published - Set to false if you don’t want a post to show up when
    the site is generated.
- - title: Override the use of default title.
+ - title - Override the use of default title.
+ - alias - Generates redirect pages for posts with aliases
+   set. (["/first-alias/index.html", "/second-alias/index.html"])
+   Place the full path of the alias (place to redirect from) inside
+   the destination post.
 
 Any other setting you provide can be accessed from within your
 template.

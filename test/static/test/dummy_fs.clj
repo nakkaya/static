@@ -59,6 +59,7 @@ text dummy post 3")
 title: dummy future post 4
 tags: 4784d643 e4e8 same
 template: temp.clj
+alias: [\"/first-alias/index.html\", \"/second-alias/index.html\"]
 ---
 
 text dummy post 4")

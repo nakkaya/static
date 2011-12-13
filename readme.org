@@ -92,6 +92,54 @@ Folder containing pages that are not posts.
 Folder containing templates that are used to render posts and pages
 with.
 
+** Markup
+
+Supported markup languages,
+
+ - markdown
+ - org-mode (via emacs)
+ - clojure (hiccup)
+ - html
+
+*** Setting per page/post settings
+
+Setting the template, title etc, for a page/post is done using a
+header placed at the top of the file,
+
+**** Markdown
+
+#+begin_example
+  ---
+  template: temp-en.clj
+  title: Blogging Like a Hacker
+  ---
+#+end_example
+
+**** org-mode
+
+#+begin_example
+  ,#+title: Blogging Like a Hacker
+  ,#+tags: clojure
+#+end_example
+
+**** Clojure
+
+#+begin_example
+  {:title "Blogging Like a Hacker"}
+#+end_example
+
+*** Page/Post Settings
+
+ - template - If set, this specifies the template file to use. Use the
+   layout file name with file extension. Layout files must be
+   placed in the *templates* directory.
+ - published - Set to false if you don’t want a post to show up when
+   the site is generated.
+ - title: Override the use of default title.
+
+Any other setting you provide can be accessed from within your
+template.
+
 ** Installation
 
 You need to place the uberjar lein created to the folder containing

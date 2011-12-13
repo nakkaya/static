@@ -110,21 +110,21 @@ Supported markup languages,
 Setting the template, title etc, for a page/post is done using a
 header placed at the top of the file,
 
-**** Markdown
-
-#+begin_src sh
-  ---
-  template: temp-en.clj
-  title: Blogging Like a Hacker
-  ---
-#+end_src
-
 **** org-mode
 
-#+begin_src sh
+#+begin_example
   ,#+title: Blogging Like a Hacker
   ,#+tags: clojure
-#+end_src
+#+end_example
+
+**** Markdown
+
+#+begin_example
+  ,---
+  template: temp-en.clj
+  title: Blogging Like a Hacker
+  ,---
+#+end_example
 
 **** Clojure
 

@@ -254,14 +254,15 @@
 (defn create-alias 
   "Create redirect pages for a post"
   [file]
-  (when-let [aliases (-> (read-doc file) first :alias)]
-    (doseq [alias (read-string aliases)]
-      (write-out-dir
-       alias
-       (html [:html
-              [:head
-               [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]
-               [:meta {:http-equiv "refresh" :content (str "0;url=" alias)}]]])))))
+  (let [doc (read-doc file)]
+    (when-let [aliases (-> doc first :alias)]
+      (doseq [alias (read-string aliases)]
+        (write-out-dir
+         alias
+         (html [:html
+                [:head
+                 [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]
+                 [:meta {:http-equiv "refresh" :content (str "0;url=" (post-url file))}]]]))))))
 
 (defn process-posts 
   "Create and write post pages."

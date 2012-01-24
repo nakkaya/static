@@ -64,7 +64,7 @@ alias: [\"/first-alias/index.html\", \"/second-alias/index.html\"]
 
 text dummy post 4")
 
-(spit 
+  (spit 
    (File. "resources/posts/2050-05-05-dummy-future-post-5.markdown")
    "---
 title: dummy future post 5
@@ -74,7 +74,7 @@ published: false
 
 Should be skipped...")
 
-(spit 
+  (spit 
    (File. "resources/posts/2050-06-06-dummy-future-post-6.html")
    "---
 title: org-jekyll entry
@@ -92,7 +92,7 @@ CATEGORY: test
 </p></div>
 </div>")
 
-(spit 
+  (spit 
    (File. "resources/posts/2050-07-07-dummy-future-post-7.org")
    "#+title: Dummy org-mode post
 #+tags: org-mode org-babel
@@ -106,7 +106,16 @@ Sum 1 and 2
 
 #+END_SRC
 
-"))
+")
+
+(spit 
+ (File. "resources/posts/2050-08-08-dummy-future-post-8.org")
+ "
+#+title: dummy future post 8
+#+tags: 45f5 8a06 same
+#+alias: [\"/a/b/c/alias/index.html\"]
+
+org alias test"))
 
 (defn- create-template []
   (spit (File. "resources/templates/temp.clj") "content"))

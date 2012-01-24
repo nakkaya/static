@@ -37,8 +37,9 @@
     (is (= "<h3>" (re-find #"<h3>" content)))))
 
 (deftest test-io
-  (is (= (count (list-files :posts)) 6))
+  (is (= (count (list-files :posts)) 7))
   (is (.exists (File. "html/first-alias/index.html")))
+  (is (.exists (File. "html/a/b/c/alias/index.html")))
   (is (.exists (File. "html/second-alias/index.html"))))
 
 (deftest test-rss-feed
@@ -71,7 +72,7 @@
 (deftest test-rss-feed
   (let [tags (File. "html/tags/index.html")
 	content (slurp tags)] 
-    (is (= 4 (count ((tag-map) "same"))))
+    (is (= 5 (count ((tag-map) "same"))))
     (is (= true (.exists tags)))
     (is (= "<a name=\"e4e8\">e4e8</a>" 
 	   (re-find #"<a name=\"e4e8\">e4e8</a>" content)))

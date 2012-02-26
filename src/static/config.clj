@@ -23,9 +23,9 @@
               (do (error "Path to Emacs not valid.")
                   (System/exit 0))))
           (merge defaults config))
-	(catch Exception e (do 
-			     (info "Configuration not found using defaults.")
-			     defaults))))))
+        (catch Exception e (do 
+                             (info "Configuration not found using defaults.")
+                             defaults))))))
 
 (defn set!-config [k v]
   (alter-var-root (find-var 'static.config/config) (fn [c] #(identity (assoc (c) k v)))))

@@ -88,7 +88,7 @@
       (fn [template]
         (-> (str (dir-path :templates) template)
             (File.)
-            (slurp :encoding (:encoding (config)))
+            (#(str \( (slurp % :encoding (:encoding (config))) \) ))
             read-string))))
 
 (defn write-out-dir [file str]

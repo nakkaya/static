@@ -9,6 +9,7 @@
   (:use ring.middleware.file)
   (:use ring.util.response)
   (:use hiccup.core)
+  (:use hiccup.page-helpers)
   (:use static.config :reload-all)
   (:use static.io :reload-all)
   (:import (java.io File)
@@ -60,7 +61,8 @@
                    (:default-template (static.config/config)))]
     (binding [*ns* (the-ns 'static.core)
               metadata m content c]
-      (-> (read-template template) eval html))))
+      (apply str (map #(html (eval %)) 
+                      (read-template template))))))
 
 (defn process-site 
   "Process site pages."

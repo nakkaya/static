@@ -3,16 +3,19 @@
   (:use [static.io] :reload)
   (:use [static.test.dummy-fs] :reload)
   (:use [clojure.test])
-  (:use [clojure.contrib.io :only [delete-file-recursively]])
-  (:import (java.io File)))
+  (:import (java.io File)
+           (org.apache.commons.io FileUtils)))
+
+(defn delete-file-recursively [f]
+  (FileUtils/deleteDirectory f))
 
 (defn dummy-fs-fixture [f]
   (create-dummy-fs)
   (create)
   (f)
-  (delete-file-recursively (File. "resources/") true)
-  (delete-file-recursively (File. "html/") true)
-  (delete-file-recursively (File. "config.clj") true))
+  (delete-file-recursively (File. "resources/"))
+  (delete-file-recursively (File. "html/"))
+  (.delete (File. "config.clj")))
 
 (use-fixtures :once dummy-fs-fixture)
 

@@ -1,15 +1,12 @@
 (ns static.core
   (:gen-class)
-  (:use [clojure.contrib.io :only [delete-file-recursively]]
-        [clojure.contrib.command-line]
-        [clojure.contrib.logging]
-        [clojure.contrib.prxml])
-  (:use clojure.java.browse)
-  (:use ring.adapter.jetty)
-  (:use ring.middleware.file)
-  (:use ring.util.response)
-  (:use hiccup.core)
-  (:use hiccup.page-helpers)
+  (:use [clojure.tools logging cli]
+        [clojure.java.browse]
+        [ring.adapter.jetty]
+        [ring.middleware.file]
+        [ring.util.response]
+        [hiccup core page-helpers])
+
   (:use static.config :reload-all)
   (:use static.io :reload-all)
   (:import (java.io File)
@@ -18,7 +15,7 @@
            (java.text SimpleDateFormat)))
 
 (defn setup-logging []
-  (let [logger (impl-get-log "")]
+  (let [logger (java.util.logging.Logger/getLogger "")]
     (doseq [handler (.getHandlers logger)]
       (. handler setFormatter
          (proxy [java.util.logging.Formatter] []
@@ -52,7 +49,8 @@
       (FilenameUtils/removeExtension)
       (str ".html")))
 
-(declare metadata content)
+(def ^:dynamic metadata nil)
+(def ^:dynamic content nil)
 
 (defn template [page]
   (let [[m c] page
@@ -92,14 +90,13 @@
   (let [in-dir (File. (dir-path :posts))
         posts (take 10 (reverse (list-files :posts)))]
     (write-out-dir "rss-feed"
-                   (with-out-str
-                     (prxml [:decl! {:version "1.0"}] 
-                            [:rss {:version "2.0"} 
-                             [:channel 
-                              [:title (:site-title (config))]
-                              [:link (:site-url (config))]
-                              [:description (:site-description (config))]
-                              (map post-xml posts)]])))))
+                   (html (xml-declaration "UTF-8")
+                         [:rss {:version "2.0"} 
+                          [:channel 
+                           [:title (:site-title (config))]
+                           [:link (:site-url (config))]
+                           [:description (:site-description (config))]
+                           (map post-xml posts)]]))))
 
 (defn create-sitemap
   "Create sitemap."
@@ -107,14 +104,13 @@
   (write-out-dir 
    "sitemap.xml"
    (let [base (:site-url (config))] 
-     (with-out-str
-       (prxml [:decl! {:version "1.0" :encoding "UTF-8"}] 
-              [:urlset {:xmlns "http://www.sitemaps.org/schemas/sitemap/0.9"}
-               [:url [:loc base]]
-               (map #(vector :url [:loc (str base %)]) 
-                    (map post-url (list-files :posts)))
-               (map #(vector :url [:loc (str base "/" %)]) 
-                    (map site-url (list-files :site)))])))))
+     (html (xml-declaration "UTF-8") 
+           [:urlset {:xmlns "http://www.sitemaps.org/schemas/sitemap/0.9"}
+            [:url [:loc base]]
+            (map #(vector :url [:loc (str base %)]) 
+                 (map post-url (list-files :posts)))
+            (map #(vector :url [:loc (str base "/" %)]) 
+                 (map site-url (list-files :site)))]))))
 
 ;;
 ;; Create Tags Page.
@@ -300,7 +296,7 @@
   "Build Site."
   [] 
   (doto (File. (:out-dir (config)))
-    (delete-file-recursively true)
+    (FileUtils/deleteDirectory)
     (.mkdir))
   (process-site)
   (process-public)
@@ -333,24 +329,31 @@
         f))))
 
 (defn -main [& args]
-  (with-command-line args
-    "Static"
-    [[build? b? "Build Site."]
-     [tmp-loc? tmp? "Use tmp location override :out-dir"]
-     [jetty? j?  "Run Jetty."]
-     [rsync? r?  "Deploy using rsync."]]
+  (let [[opts _ banner] (cli args
+                             ["--build" "Build Site." :default false :flag true]
+                             ["--tmp" "Use tmp location override :out-dir" :default false :flag true]
+                             ["--jetty" "View Site." :default false :flag true]
+                             ["--rsync" "Deploy Site." :default false :flag true]
+                             ["--help" "Show help" :default false :flag true])
+        {:keys [build tmp jetty rsync help]} opts]
+
+    (when help
+      (println "Static")
+      (println banner)
+      (System/exit 0))
+
     (setup-logging)
 
-    (when tmp-loc?
+    (when tmp
       (config) ;;load config
       (let [loc (str (System/getProperty "java.io.tmpdir") "static/")]
         (set!-config :out-dir loc)
         (info (str "Using tmp location: " (:out-dir (config))))))
     
-    (cond build? (log-time-elapsed "Build took " (create))
-          jetty? (do (future (run-jetty serve-static {:port 8080}))
-                     (browse-url "http://127.0.0.1:8080"))
-          rsync? (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
-                   (deploy-rsync rsync out-dir host user deploy-dir))
+    (cond build (log-time-elapsed "Build took " (create))
+          jetty (do (future (run-jetty serve-static {:port 8080}))
+                    (browse-url "http://127.0.0.1:8080"))
+          rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
+                  (deploy-rsync rsync out-dir host user deploy-dir))
           :default (println "Use -h for options.")))
   (shutdown-agents))

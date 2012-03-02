@@ -1,5 +1,4 @@
 (ns static.test.dummy-fs
-  (:use [clojure.contrib.io :only [delete-file-recursively]])
   (:import (java.io File)))
 
 (defn- create-resources []

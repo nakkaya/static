@@ -1,8 +1,8 @@
 (ns static.io
-  (:use [clojure.contrib.logging])
-  (:use [clojure.java.shell :only [sh]])
+  (:use [clojure.tools logging]
+        [clojure.java.shell :only [sh]]
+        [hiccup core])
   (:use static.config :reload-all)
-  (:use hiccup.core)
   (:import (com.petebevin.markdown MarkdownProcessor)
            (java.io File)
            (org.apache.commons.io FileUtils FilenameUtils)))

@@ -1,5 +1,5 @@
 (ns static.config
-  (:use [clojure.contrib.logging])
+  (:use [clojure.tools logging])
   (:import (java.io File)))
 
 

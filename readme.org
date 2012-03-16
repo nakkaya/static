@@ -103,6 +103,7 @@ Supported markup languages,
  - markdown
  - org-mode (via emacs)
  - clojure (hiccup)
+ - cssgen
  - html
 
 *** Setting per page/post settings
@@ -131,6 +132,10 @@ header placed at the top of the file,
 #+BEGIN_SRC clojure
   {:title "Blogging Like a Hacker"}
 #+END_SRC
+
+**** cssgen
+
+cssgen does not support file-specific settings.
 
 *** Page/Post Settings
 

@@ -43,11 +43,13 @@
   (let [name (FilenameUtils/getBaseName (str file))]
     (str (apply str (interleave (repeat \/) (.split name "-" 4))) "/")))
 
-(defn site-url [f]
+(defn site-url [f & [ext]]
   (-> (str f)
       (.replaceAll (dir-path :site) "")
       (FilenameUtils/removeExtension)
-      (str ".html")))
+      (str "."
+           (or ext
+               (:default-extension (config))))))
 
 (def ^:dynamic metadata nil)
 (def ^:dynamic content nil)
@@ -56,11 +58,13 @@
   (let [[m c] page
         template (if (:template m)
                    (:template m) 
-                   (:default-template (static.config/config)))]
+                   (:default-template (static.config/config)))
+        template-string (if (= template :none)
+                          content
+                          (read-template template))]
     (binding [*ns* (the-ns 'static.core)
               metadata m content c]
-      (apply str (map #(html (eval %)) 
-                      (read-template template))))))
+      (apply str (map #(html (eval %)) template-string)))))
 
 (defn process-site 
   "Process site pages."
@@ -68,7 +72,7 @@
   (doseq [f (list-files :site)]
     (let [[metadata content] (read-doc f)]
       (write-out-dir
-       (site-url f)
+       (site-url f (:extension metadata))
        (template [(assoc metadata :type :site) content])))))
 
 ;;

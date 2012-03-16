@@ -3,6 +3,7 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.cli "0.2.1"]
                  [org.clojure/tools.logging "0.2.3"]
+                 [cssgen "0.3.0-SNAPSHOT"]
                  [hiccup "0.3.8"]
                  [org.pegdown/pegdown "1.1.0"]
                  [org.clojars.amit/commons-io "1.4.0"]

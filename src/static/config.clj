@@ -9,6 +9,7 @@
                 :in-dir "resources/"
                 :out-dir "html/"
                 :default-template "default.clj"
+                :default-extension "html"
                 :encoding "UTF-8"
                 :posts-per-page 2
                 :blog-as-index true}]

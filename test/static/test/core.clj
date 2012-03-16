@@ -27,6 +27,10 @@
     (is (= "Some dummy file for unit testing."
 	   (re-find #"Some dummy file for unit testing." content)))))
 
+(deftest test-cssgen
+  (let [[metadata content] (read-doc "resources/site/style.cssgen")]
+    (is (= "font-size: 1em;" (re-find #"font-size: 1em;" content)))))
+
 (deftest test-org
   (let [[metadata content] (read-doc (File. "resources/posts/2050-07-07-dummy-future-post-7.org"))] 
     (is (= "org-mode org-babel"  (:tags metadata)))

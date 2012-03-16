@@ -1,7 +1,8 @@
 (ns static.io
   (:use [clojure.tools logging]
         [clojure.java.shell :only [sh]]
-        [hiccup core])
+        [hiccup core]
+        [cssgen])
   (:use static.config :reload-all)
   (:import (com.petebevin.markdown MarkdownProcessor)
            (java.io File)
@@ -48,6 +49,12 @@
                               (str \( (slurp file :encoding (:encoding (config))) \)))]
     [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval html))]))
 
+(defn- read-cssgen [file]
+  (let [metadata {:extension "css" :template :none}
+        content (read-string
+                 (slurp file :encoding (:encoding (config))))]
+    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval css))]))  
+
 (def read-doc
      (memoize
       (fn [f]
@@ -58,6 +65,7 @@
                 (= extension "org") (read-org f)
                 (= extension "html") (read-html f)
                 (= extension "clj") (read-clj f)
+                (= extension "cssgen") (read-cssgen f)
                 :default (throw (Exception. "Unknown Extension.")))))))
 
 (defn dir-path [dir]
@@ -80,6 +88,7 @@
         (FileUtils/listFiles d (into-array ["markdown"
                                             "md"
                                             "clj"
+                                            "cssgen"
                                             "org"
                                             "html"]) true))) [] )))
 

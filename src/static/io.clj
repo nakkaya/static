@@ -3,11 +3,12 @@
         [clojure.java.shell :only [sh]]
         [hiccup core])
   (:use static.config :reload-all)
-  (:import (com.petebevin.markdown MarkdownProcessor)
+  (:import (org.pegdown PegDownProcessor)
            (java.io File)
            (org.apache.commons.io FileUtils FilenameUtils)))
 
-(defn- markdown [txt] (.markdown (MarkdownProcessor.) txt))
+(def markdown-processor (PegDownProcessor.))
+(defn- markdown [txt] (.markdownToHtml markdown-processor txt))
 
 (defn- split-file [content]
   (let [idx (.indexOf content "---" 4)]

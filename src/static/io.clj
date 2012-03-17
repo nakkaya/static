@@ -57,7 +57,6 @@
     [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval css))]))  
 
 (def read-doc
-     (memoize
       (fn [f]
         (let [extension (FilenameUtils/getExtension (str f))]
           (cond (or (= extension "markdown") (= extension "md"))
@@ -67,7 +66,7 @@
                 (= extension "html") (read-html f)
                 (= extension "clj") (read-clj f)
                 (= extension "cssgen") (read-cssgen f)
-                :default (throw (Exception. "Unknown Extension.")))))))
+                :default (throw (Exception. "Unknown Extension."))))))
 
 (defn dir-path [dir]
   (cond (= dir :templates) (str (:in-dir (config)) "templates/")

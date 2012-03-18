@@ -338,10 +338,12 @@
   []
   (watcher/watcher [(:in-dir (config))]
                    (watcher/rate 1000)
-                   ;; TODO need to handle exceptions on create
                    (watcher/on-change (fn [_]
                                         (println "Rebuilding site...")
-                                        (create)))))
+                                        (try
+                                          (create)
+                                          (catch Exception e
+                                            (println (str "Exception thrown while building site! " e))))))))
 
 (defn -main [& args]
   (let [[opts _ banner] (cli args

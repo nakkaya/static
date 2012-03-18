@@ -166,10 +166,11 @@ config.clj.
 
 *** Testing the site
 
-You can test the site locally using jetty, which will launch on http://localhost:8080.
+You can test the site locally using jetty, which will launch on http://localhost:8080. 
+The site will rebuild if you change any of the source files.
 
 #+BEGIN_EXAMPLE
-    java -jar static-app.jar -j
+    java -jar static-app.jar --watch
 #+END_EXAMPLE
 
 *** Deploying the site

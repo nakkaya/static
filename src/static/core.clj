@@ -1,5 +1,6 @@
 (ns static.core
   (:gen-class)
+  (:require [watchtower.core :as watcher])
   (:use [clojure.tools logging cli]
         [clojure.java.browse]
         [ring.adapter.jetty]
@@ -332,14 +333,27 @@
         (merge f {:headers {"Content-Type" mimetype}}) 
         f))))
 
+(defn watch-and-rebuild
+  "Watch for changes and rebuild site on change."
+  []
+  (watcher/watcher [(:in-dir (config))]
+                   (watcher/rate 1000)
+                   (watcher/on-change (fn [_]
+                                        (println "Rebuilding site...")
+                                        (try
+                                          (create)
+                                          (catch Exception e
+                                            (println (str "Exception thrown while building site! " e))))))))
+
 (defn -main [& args]
   (let [[opts _ banner] (cli args
                              ["--build" "Build Site." :default false :flag true]
                              ["--tmp" "Use tmp location override :out-dir" :default false :flag true]
                              ["--jetty" "View Site." :default false :flag true]
+                             ["--watch" "Watch Site and Rebuild on Change." :default false :flag true]
                              ["--rsync" "Deploy Site." :default false :flag true]
                              ["--help" "Show help" :default false :flag true])
-        {:keys [build tmp jetty rsync help]} opts]
+        {:keys [build tmp jetty watch rsync help]} opts]
 
     (when help
       (println "Static")
@@ -355,6 +369,9 @@
         (info (str "Using tmp location: " (:out-dir (config))))))
     
     (cond build (log-time-elapsed "Build took " (create))
+          watch (do (watch-and-rebuild)
+                    (future (run-jetty serve-static {:port 8080}))
+                    (browse-url "http://127.0.0.1:8080"))
           jetty (do (future (run-jetty serve-static {:port 8080}))
                     (browse-url "http://127.0.0.1:8080"))
           rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config)]

@@ -254,18 +254,23 @@
         [{:title "Archives" :template (:default-template (config))}
          (html (map snippet posts))])))))
 
-(defn create-alias 
-  "Create redirect pages for a post"
-  [file]
-  (let [doc (read-doc file)]
-    (when-let [aliases (-> doc first :alias)]
-      (doseq [alias (read-string aliases)]
-        (write-out-dir
-         alias
-         (html [:html
-                [:head
-                 [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]
-                 [:meta {:http-equiv "refresh" :content (str "0;url=" (post-url file))}]]]))))))
+(defn create-aliases 
+  "Create redirect pages."
+  ([]
+     (doseq [post (list-files :posts)]
+       (create-aliases post))
+     (doseq [site (list-files :site)]
+       (create-aliases site)))
+  ([file]
+     (let [doc (read-doc file)]
+       (when-let [aliases (-> doc first :alias)]
+         (doseq [alias (read-string aliases)]
+           (write-out-dir
+            alias
+            (html [:html
+                   [:head
+                    [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]
+                    [:meta {:http-equiv "refresh" :content (str "0;url=" (post-url file))}]]])))))))
 
 (defn process-posts 
   "Create and write post pages."
@@ -289,32 +294,27 @@
         (FileUtils/copyFileToDirectory f out-dir)
         (FileUtils/copyDirectoryToDirectory f out-dir)))))
 
-(defn process-aliases
-  "Create redirect pages."
-  []
-  (doseq [post (list-files :posts)]
-    (create-alias post))
-  (doseq [site (list-files :site)]
-    (create-alias site)))
-
 (defn create 
   "Build Site."
   [] 
   (doto (File. (:out-dir (config)))
     (FileUtils/deleteDirectory)
     (.mkdir))
-  (process-site)
-  (process-public)
+
+  (log-time-elapsed "Processing Public " (process-public))
+  (log-time-elapsed "Processing Site " (process-site))
+  
   (if (pos? (-> (dir-path :posts) (File.) .list count))
     (do 
-      (process-posts)
-      (create-rss)
-      (create-tags)
-      (create-archives)
-      (create-sitemap)
-      (process-aliases)
+      (log-time-elapsed "Processing Posts " (process-posts))
+      (log-time-elapsed "Creating RSS " (create-rss))
+      (log-time-elapsed "Creating Tags " (create-tags))
+      (log-time-elapsed "Creating Archives " (create-archives))
+      (log-time-elapsed "Creating Sitemap " (create-sitemap))
+      (log-time-elapsed "Creating Aliases " (create-aliases))
+
       (when (:blog-as-index (config))
-        (create-latest-posts)
+        (log-time-elapsed "Creating Latest Posts " (create-latest-posts))
         (let [max (apply max (map read-string (-> (:out-dir (config))
                                                   (str  "latest-posts/")
                                                   (File.)

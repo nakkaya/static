@@ -54,19 +54,18 @@
   (let [metadata {:extension "css" :template :none}
         content (read-string
                  (slurp file :encoding (:encoding (config))))]
-    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval css))]))  
+    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval css))]))
 
-(def read-doc
-      (fn [f]
-        (let [extension (FilenameUtils/getExtension (str f))]
-          (cond (or (= extension "markdown") (= extension "md"))
-                    (read-markdown f)
-                (= extension "md") (read-markdown f)
-                (= extension "org") (read-org f)
-                (= extension "html") (read-html f)
-                (= extension "clj") (read-clj f)
-                (= extension "cssgen") (read-cssgen f)
-                :default (throw (Exception. "Unknown Extension."))))))
+(defn read-doc [f]
+  (let [extension (FilenameUtils/getExtension (str f))]
+    (cond (or (= extension "markdown") (= extension "md"))
+          (read-markdown f)
+          (= extension "md") (read-markdown f)
+          (= extension "org") (read-org f)
+          (= extension "html") (read-html f)
+          (= extension "clj") (read-clj f)
+          (= extension "cssgen") (read-cssgen f)
+          :default (throw (Exception. "Unknown Extension.")))))
 
 (defn dir-path [dir]
   (cond (= dir :templates) (str (:in-dir (config)) "templates/")

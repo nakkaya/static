@@ -25,12 +25,12 @@
 (defn- read-markdown [file]
   (let [[metadata content]
         (split-file (slurp file :encoding (:encoding (config))))]
-    [(prepare-metadata metadata) (markdown content)]))
+    [(prepare-metadata metadata) (delay (markdown content))]))
 
 (defn- read-html [file]
   (let [[metadata content]
         (split-file (slurp file :encoding (:encoding (config))))]
-    [(prepare-metadata metadata) content]))
+    [(prepare-metadata metadata) (delay content)]))
 
 (def emacs nil)
 
@@ -93,25 +93,26 @@
   (if (nil? emacs)
     (alter-var-root (find-var 'static.io/emacs) (fn [c] (emacs-start))))
   (let [metadata (prepare-metadata (slurp file :encoding (:encoding (config))))
-        content (do (emacs-write (:output emacs)
-                                 (str
-                                  "(progn "
-                                  " (revert-all-buffers)"
-                                  " (find-file \"" (.getAbsolutePath file) "\") "
-                                  " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))
-                    (emacs-read (:input emacs)))]
+        content (delay
+                 (emacs-write (:output emacs)
+                              (str
+                               "(progn "
+                               " (revert-all-buffers)"
+                               " (find-file \"" (.getAbsolutePath file) "\") "
+                               " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))
+                 (emacs-read (:input emacs)))]
     [metadata content]))
 
 (defn- read-clj [file]
   (let [[metadata content] (read-string
                               (str \( (slurp file :encoding (:encoding (config))) \)))]
-    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval html))]))
+    [metadata (delay (binding [*ns* (the-ns 'static.core)] (-> content eval html)))]))
 
 (defn- read-cssgen [file]
   (let [metadata {:extension "css" :template :none}
         content (read-string
                  (slurp file :encoding (:encoding (config))))]
-    [metadata (binding [*ns* (the-ns 'static.core)] (-> content eval css))]))
+    [metadata (delay (binding [*ns* (the-ns 'static.core)] (-> content eval css)))]))
 
 (defn read-doc [f]
   (let [extension (FilenameUtils/getExtension (str f))]
@@ -136,7 +137,7 @@
     (if (.isDirectory d)
       (sort
        (filter
-        #(let [[metadata _] (read-doc %)
+        #(let [[metadata] (read-doc %)
                published? (:published metadata)]
            (if (or (nil? published?)
                    (= published? "true"))

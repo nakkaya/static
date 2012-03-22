@@ -74,7 +74,7 @@
     (let [[metadata content] (read-doc f)]
       (write-out-dir
        (site-url f (:extension metadata))
-       (template [(assoc metadata :type :site) content])))))
+       (template [(assoc metadata :type :site) @content])))))
 
 ;;
 ;; Create RSS Feed.
@@ -87,7 +87,7 @@
     [:item 
      [:title (:title metadata)]
      [:link  (str (URL. (URL. (:site-url (config))) (post-url file)))]
-     [:description content]]))
+     [:description @content]]))
 
 (defn create-rss 
   "Create RSS feed."
@@ -126,7 +126,7 @@
   []
   (reduce 
    (fn[h v]
-     (let [[metadata _] (read-doc v)
+     (let [[metadata] (read-doc v)
            info [(post-url v) (:title metadata)]
            tags (.split (:tags metadata) " ")]
        (reduce 
@@ -185,7 +185,7 @@
       (parse-date "yyyy-MM-dd" "dd MMM yyyy" 
                   (re-find #"\d*-\d*-\d*" 
                            (FilenameUtils/getBaseName (str f))))]
-     [:p content]]))
+     [:p @content]]))
 
 (defn create-latest-posts 
   "Create and write latest post pages."
@@ -282,7 +282,7 @@
       (write-out-dir 
        (str out-file "/index.html")
        (template 
-        [(assoc metadata :type :post :url (post-url f)) content])))))
+        [(assoc metadata :type :post :url (post-url f)) @content])))))
 
 (defn process-public 
   "Copy public from in-dir to out-dir."

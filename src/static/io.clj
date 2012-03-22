@@ -79,12 +79,10 @@
 
 (defn- emacs-read [stream]
   (while (not (.ready stream)) (Thread/sleep 10))
-  (apply str
-         (map char
-              (loop [res []]
-                (if (.ready stream)
-                  (recur (concat res [(.read stream)]))
-                  res)))))
+  (let [buff (StringBuffer.)]
+    (while (.ready stream)
+      (.append buff (char (.read stream))))
+    (.toString buff)))
 
 (defn- read-org [file]
   (if (not (:emacs (config)))

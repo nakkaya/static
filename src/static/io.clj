@@ -134,18 +134,12 @@
   (let [d (File. (dir-path d))]
     (if (.isDirectory d)
       (sort
-       (filter
-        #(let [[metadata] (read-doc %)
-               published? (:published metadata)]
-           (if (or (nil? published?)
-                   (= published? "true"))
-             true false))
-        (FileUtils/listFiles d (into-array ["markdown"
-                                            "md"
-                                            "clj"
-                                            "cssgen"
-                                            "org"
-                                            "html"]) true))) [] )))
+       (FileUtils/listFiles d (into-array ["markdown"
+                                           "md"
+                                           "clj"
+                                           "cssgen"
+                                           "org"
+                                           "html"]) true)) [] )))
 
 (def read-template
      (memoize

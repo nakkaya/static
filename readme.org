@@ -142,8 +142,6 @@ cssgen does not support file-specific settings.
  - template - If set, this specifies the template file to use. Use the
    layout file name with file extension. Layout files must be
    placed in the *templates* directory.
- - published - Set to false if you don’t want a post to show up when
-   the site is generated.
  - title - Override the use of default title.
  - alias - Generates redirect pages for posts with aliases
    set. (["/first-alias/index.html", "/second-alias/index.html"])

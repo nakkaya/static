@@ -32,73 +32,19 @@
         (split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata) (delay content)]))
 
-(def emacs nil)
-
-(defn emacs-start []
-  (let [runtime (Runtime/getRuntime)
-        process (.exec runtime
-                       (into-array [(:emacs (config))
-                                    "-batch"
-                                    "-eval"
-                                    (str   
-                                     "
-                                       (progn
-                                        (require 'cl)
-                                       
-                                        (defun read-expression ()
-                                          (read-string \"\"))
-                                       
-                                        (defun read-expression-from-string (str)
-                                          (read-from-string str))
-                                       
-                                        (defun repl ()
-                                          (loop for expr = (read-string \"\") then (read-expression)
-                                                do
-                                                (let ((form (car (read-expression-from-string expr))))
-                                                  (message \"%s\" (eval form)))))
-                                       
-                                        (defun revert-all-buffers ()
-                                          (interactive)
-                                          (dolist (buf (buffer-list))
-                                                  (with-current-buffer buf
-                                                    (when (and (buffer-file-name) (not (buffer-modified-p)))
-                                                      (revert-buffer t t t)))))
-                                       
-                                        " (apply str (map second (:emacs-eval (config)))) "
-                                        (repl))")]))]
-    (.addShutdownHook runtime (Thread. #(.destroy process)))
-    {:process process
-     :input (InputStreamReader. (.getInputStream process))
-     :output (OutputStreamWriter. (.getOutputStream process))
-     :error (InputStreamReader. (.getErrorStream process))}))
-
-(defn- emacs-write [stream str]
-  (.write stream str)
-  (.write stream (System/getProperty "line.separator"))
-  (.flush stream))
-
-(defn- emacs-read [stream]
-  (while (not (.ready stream)) (Thread/sleep 10))
-  (let [buff (StringBuffer.)]
-    (while (.ready stream)
-      (.append buff (char (.read stream))))
-    (.toString buff)))
-
 (defn- read-org [file]
   (if (not (:emacs (config)))
     (do (error "Path to Emacs is required for org files.")
         (System/exit 0)))
-  (if (nil? emacs)
-    (alter-var-root (find-var 'static.io/emacs) (fn [c] (emacs-start))))
   (let [metadata (prepare-metadata (slurp file :encoding (:encoding (config))))
         content (delay
-                 (emacs-write (:output emacs)
-                              (str
-                               "(progn "
-                               " (revert-all-buffers)"
-                               " (find-file \"" (.getAbsolutePath file) "\") "
-                               " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))
-                 (emacs-read (:input emacs)))]
+                 (:out (sh (:emacs (config))
+                           "-batch" "-eval"
+                           (str
+                            "(progn "
+                            (apply str (map second (:emacs-eval (config))))
+                            " (find-file \"" (.getAbsolutePath file) "\") "
+                            " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))))]
     [metadata content]))
 
 (defn- read-clj [file]

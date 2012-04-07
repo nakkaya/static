@@ -44,7 +44,7 @@
     (is (= "<h3>" (re-find #"<h3>" @content)))))
 
 (deftest test-io
-  (is (= (count (list-files :posts)) 7))
+  (is (= (count (list-files :posts)) 8))
   (is (.exists (File. "html/first-alias/index.html")))
   (is (.exists (File. "html/a/b/c/alias/index.html")))
   (is (.exists (File. "html/second-alias/index.html"))))

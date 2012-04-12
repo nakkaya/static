@@ -364,7 +364,8 @@
 
     (when tmp
       (config) ;;load config
-      (let [loc (str (System/getProperty "java.io.tmpdir") "static/")]
+      (let [loc (FilenameUtils/normalize
+                 (str (System/getProperty "java.io.tmpdir") "/" "static/"))]
         (set!-config :out-dir loc)
         (info (str "Using tmp location: " (:out-dir (config))))))
     

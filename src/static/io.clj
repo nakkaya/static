@@ -9,9 +9,6 @@
            (java.io InputStreamReader OutputStreamWriter)
            (org.apache.commons.io FileUtils FilenameUtils)))
 
-(def markdown-processor (PegDownProcessor.))
-(defn- markdown [txt] (.markdownToHtml markdown-processor txt))
-
 (defn- split-file [content]
   (let [idx (.indexOf content "---" 4)]
     [(.substring content 4 idx) (.substring content (+ 3 idx))]))
@@ -25,7 +22,8 @@
 (defn- read-markdown [file]
   (let [[metadata content]
         (split-file (slurp file :encoding (:encoding (config))))]
-    [(prepare-metadata metadata) (delay (markdown content))]))
+    [(prepare-metadata metadata)
+     (delay (.markdownToHtml (PegDownProcessor.) content))]))
 
 (defn- read-html [file]
   (let [[metadata content]

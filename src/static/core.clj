@@ -70,11 +70,14 @@
 (defn process-site 
   "Process site pages."
   []
-  (doseq [f (list-files :site)]
-    (let [[metadata content] (read-doc f)]
-      (write-out-dir
-       (site-url f (:extension metadata))
-       (template [(assoc metadata :type :site) @content])))))
+  (dorun
+   (pmap
+    #(let [f %
+           [metadata content] (read-doc f)]
+       (write-out-dir
+        (site-url f (:extension metadata))
+        (template [(assoc metadata :type :site) @content])))
+    (list-files :site))))
 
 ;;
 ;; Create RSS Feed.
@@ -101,7 +104,7 @@
                            [:title (:site-title (config))]
                            [:link (:site-url (config))]
                            [:description (:site-description (config))]
-                           (map post-xml posts)]]))))
+                           (pmap post-xml posts)]]))))
 
 (defn create-sitemap
   "Create sitemap."
@@ -243,16 +246,19 @@
               (post-count-by-mount))]))]))
   
   ;;create a page for each month.
-  (doseq [month (keys (post-count-by-mount))] 
-    (let [posts (->> (list-files :posts)
-                     (filter #(.startsWith 
-                               (FilenameUtils/getBaseName (str %)) month))
-                     reverse)]
-      (write-out-dir
-       (str "archives/" (.replace month "-" "/") "/index.html")
-       (template
-        [{:title "Archives" :template (:default-template (config))}
-         (html (map snippet posts))])))))
+  (dorun
+   (pmap
+    (fn [month]
+      (let [posts (->> (list-files :posts)
+                       (filter #(.startsWith 
+                                 (FilenameUtils/getBaseName (str %)) month))
+                       reverse)]
+        (write-out-dir
+         (str "archives/" (.replace month "-" "/") "/index.html")
+         (template
+          [{:title "Archives" :template (:default-template (config))}
+           (html (map snippet posts))]))))
+    (keys (post-count-by-mount)))))
 
 (defn create-aliases 
   "Create redirect pages."
@@ -275,14 +281,17 @@
 (defn process-posts 
   "Create and write post pages."
   []
-  (doseq [f (list-files :posts)]
-    (let [[metadata content] (read-doc f)
-          out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
-                           (FilenameUtils/getBaseName (str f)) (range 3))]
-      (write-out-dir 
-       (str out-file "/index.html")
-       (template 
-        [(assoc metadata :type :post :url (post-url f)) @content])))))
+  (dorun
+   (pmap
+    #(let [f %
+           [metadata content] (read-doc f)
+           out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
+                            (FilenameUtils/getBaseName (str f)) (range 3))]
+       (write-out-dir 
+        (str out-file "/index.html")
+        (template 
+         [(assoc metadata :type :post :url (post-url f)) @content])))
+    (list-files :posts))))
 
 (defn process-public 
   "Copy public from in-dir to out-dir."

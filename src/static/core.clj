@@ -318,7 +318,10 @@
       (log-time-elapsed "Processing Posts " (process-posts))
       (log-time-elapsed "Creating RSS " (create-rss))
       (log-time-elapsed "Creating Tags " (create-tags))
-      (log-time-elapsed "Creating Archives " (create-archives))
+      
+      (when (:create-archives (config))
+        (log-time-elapsed "Creating Archives " (create-archives)))
+      
       (log-time-elapsed "Creating Sitemap " (create-sitemap))
       (log-time-elapsed "Creating Aliases " (create-aliases))
 

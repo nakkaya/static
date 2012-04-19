@@ -12,7 +12,8 @@
                 :default-extension "html"
                 :encoding "UTF-8"
                 :posts-per-page 2
-                :blog-as-index true}]
+                :blog-as-index true
+                :create-archives true}]
   
   (def config
     (memoize

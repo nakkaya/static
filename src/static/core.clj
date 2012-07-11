@@ -88,7 +88,7 @@
   [file]
   (let [[metadata content] (read-doc file)]
     [:item 
-     [:title (:title metadata)]
+     [:title (escape-html (:title metadata))]
      [:link  (str (URL. (URL. (:site-url (config))) (post-url file)))]
      [:description @content]]))
 
@@ -101,9 +101,10 @@
                    (html (xml-declaration "UTF-8")
                          [:rss {:version "2.0"} 
                           [:channel 
-                           [:title (:site-title (config))]
+                           [:title (escape-html (:site-title (config)))]
                            [:link (:site-url (config))]
-                           [:description (:site-description (config))]
+                           [:description
+                            (escape-html (:site-description (config)))]
                            (pmap post-xml posts)]]))))
 
 (defn create-sitemap

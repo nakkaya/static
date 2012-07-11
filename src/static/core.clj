@@ -103,6 +103,7 @@
         posts (take 10 (reverse (list-files :posts)))]
     (write-out-dir "rss-feed"
                    (html (xml-declaration "UTF-8")
+                         (doctype :xhtml-strict)
                          [:rss {:version "2.0"} 
                           [:channel 
                            [:title (escape-html (:site-title (config)))]

@@ -74,6 +74,10 @@
    (pmap
     #(let [f %
            [metadata content] (read-doc f)]
+
+       (if (empty? @content)
+         (warn (str "Empty Content: " f)))
+       
        (write-out-dir
         (site-url f (:extension metadata))
         (template [(assoc metadata :type :site) @content])))
@@ -288,6 +292,10 @@
            [metadata content] (read-doc f)
            out-file (reduce (fn[h v] (.replaceFirst h "-" "/")) 
                             (FilenameUtils/getBaseName (str f)) (range 3))]
+       
+       (if (empty? @content)
+         (warn (str "Empty Content: " f)))
+       
        (write-out-dir 
         (str out-file "/index.html")
         (template 

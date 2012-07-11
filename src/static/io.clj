@@ -34,7 +34,9 @@
   (if (not (:emacs (config)))
     (do (error "Path to Emacs is required for org files.")
         (System/exit 0)))
-  (let [metadata (prepare-metadata (slurp file :encoding (:encoding (config))))
+  (let [metadata (prepare-metadata
+                  (apply str
+                         (take 500 (slurp file :encoding (:encoding (config))))))
         content (delay
                  (:out (sh (:emacs (config))
                            "-batch" "-eval"

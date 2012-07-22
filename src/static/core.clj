@@ -61,7 +61,7 @@
                    (:template m) 
                    (:default-template (static.config/config)))
         template-string (if (= template :none)
-                          content
+                          c
                           (read-template template))]
     (binding [*ns* (the-ns 'static.core)
               metadata m content c]

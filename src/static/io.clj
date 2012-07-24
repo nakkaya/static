@@ -55,7 +55,7 @@
 (defn- read-cssgen [file]
   (let [metadata {:extension "css" :template :none}
         content (read-string
-                 (str \[ (slurp file :encoding (:encoding (config))) \]))
+                 (slurp file :encoding (:encoding (config))))
         to-css  #(clojure.string/join "\n" (doall (map css %)))]
     [metadata (delay (binding [*ns* (the-ns 'static.core)] (-> content eval to-css)))]))
 

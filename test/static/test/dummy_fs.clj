@@ -19,7 +19,7 @@ tags: unit test
 Some dummy file for unit testing.")
 
   (spit (File. "resources/site/style.cssgen")
-  "[:body :font-size :1em]")      
+  "[[:body :font-size :1em]]")
   
 (spit (File. "resources/site/dummy_clj.clj")
 	"{:title \"Dummy Clj File\"}

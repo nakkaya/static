@@ -320,6 +320,11 @@
     (FileUtils/deleteDirectory)
     (.mkdir))
 
+  (when (and (:emacs (config))
+             (:emacsclient (config)))
+    (info "Starting Emacs Server")
+    (emacs-start))
+
   (log-time-elapsed "Processing Public " (process-public))
   (log-time-elapsed "Processing Site " (process-site))
   
@@ -344,7 +349,12 @@
           (FileUtils/copyFile 
            (File. (str (:out-dir (config)) 
                        "latest-posts/" max "/index.html")) 
-           (File. (str (:out-dir (config)) "index.html"))))))))
+           (File. (str (:out-dir (config)) "index.html")))))))
+  
+  (when (and (:emacs (config))
+             (:emacsclient (config)))
+    (info "Stopping Emacs Server")
+    (emacs-stop)))
 
 (defn serve-static [req] 
   (let [mime-types {".clj" "text/plain"

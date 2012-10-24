@@ -63,15 +63,17 @@
                       (apply str
                              (take 500 (slurp file :encoding (:encoding (config))))))
             content (delay
-                     (:out (sh (:emacsclient (config))
-                               "-s"
-                               "staticEmacsServer"
-                               "-n"
-                               "-eval"
-                               (str
-                                "(progn "
-                                " (find-file \"" (.getAbsolutePath file) "\") "
-                                " (org-no-properties (org-export-as-html nil nil nil 'string t nil)))"))))]
+                     (->> (sh (:emacsclient (config))
+                              "-s"
+                              "staticEmacsServer"
+                              "-n"
+                              "-eval"
+                              (str
+                               "(progn "
+                               " (find-file \"" (.getAbsolutePath file) "\") "
+                               " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))
+                          :out
+                          read-string))]
         [metadata content]))))
 
 (defn- read-clj [file]

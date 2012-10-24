@@ -52,25 +52,27 @@
 
 ;;(emacs-stop)
 
-(defn- read-org [file]
-  (if (or (not (:emacs (config)))
-          (not (:emacsclient (config))))
-    (do (error "Path to Emacs and Emacs Client are required for org files.")
-        (System/exit 0)))
-  (let [metadata (prepare-metadata
-                  (apply str
-                         (take 500 (slurp file :encoding (:encoding (config))))))
-        content (delay
-                 (:out (sh (:emacsclient (config))
-                           "-s"
-                           "staticEmacsServer"
-                           "-n"
-                           "-eval"
-                           (str
-                            "(progn "
-                            " (find-file \"" (.getAbsolutePath file) "\") "
-                            " (org-no-properties (org-export-as-html nil nil nil 'string t nil)))"))))]
-    [metadata content]))
+(let [process (Object.)]
+  (defn- read-org [file]
+    (if (or (not (:emacs (config)))
+            (not (:emacsclient (config))))
+      (do (error "Path to Emacs and Emacs Client are required for org files.")
+          (System/exit 0)))
+    (locking process
+      (let [metadata (prepare-metadata
+                      (apply str
+                             (take 500 (slurp file :encoding (:encoding (config))))))
+            content (delay
+                     (:out (sh (:emacsclient (config))
+                               "-s"
+                               "staticEmacsServer"
+                               "-n"
+                               "-eval"
+                               (str
+                                "(progn "
+                                " (find-file \"" (.getAbsolutePath file) "\") "
+                                " (org-no-properties (org-export-as-html nil nil nil 'string t nil)))"))))]
+        [metadata content]))))
 
 (defn- read-clj [file]
   (let [[metadata content] (read-string

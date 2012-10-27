@@ -29,9 +29,9 @@ Some dummy file for unit testing.")
   (spit 
    (File. "resources/posts/2050-01-01-dummy-future-post-1.markdown")
    "---
-title: dummy future post 1
-tags: 4673 9c0e same
-template: temp.clj
+TITLE: dummy future post 1
+TAGS: 4673 9c0e same
+TEMPLATE: temp.clj
 ---
 
 text dummy post 1")

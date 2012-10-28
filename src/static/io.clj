@@ -41,7 +41,9 @@
                       (str   
                        "(progn
                          (setq server-name \"staticEmacsServer\")
-                       " (apply str (map second (:emacs-eval (config)))) ")")])))
+                       " (apply str (map second (:emacs-eval (config)))) ")")]))
+  ;;give emacs some time to boot
+  (Thread/sleep 3000))
 
 ;;(emacs-start)
 

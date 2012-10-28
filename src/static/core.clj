@@ -406,8 +406,8 @@
                   (deploy-rsync rsync out-dir host user deploy-dir))
           :default (println "Use --help for options.")))
   
-  (shutdown-agents)
   (when (and (:emacs (config))
              (:emacsclient (config)))
     (info "Stopping Emacs Server")
-    (emacs-stop)))
+    (emacs-stop))
+  (shutdown-agents))

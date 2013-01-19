@@ -11,10 +11,8 @@
 
 (defn dummy-fs-fixture [f]
   (create-dummy-fs)
-  (emacs-start)
   (create)
   (f)
-  (emacs-stop)
   (delete-file-recursively (File. "resources/"))
   (delete-file-recursively (File. "html/"))
   (.delete (File. "config.clj")))

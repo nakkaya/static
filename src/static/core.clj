@@ -319,7 +319,7 @@
   (doto (File. (:out-dir (config)))
     (FileUtils/deleteDirectory)
     (.mkdir))
-  
+
   (log-time-elapsed "Processing Public " (process-public))
   (log-time-elapsed "Processing Site " (process-site))
   
@@ -390,11 +390,6 @@
                  (str (System/getProperty "java.io.tmpdir") "/" "static/"))]
         (set!-config :out-dir loc)
         (info (str "Using tmp location: " (:out-dir (config))))))
-
-    (when (and (:emacs (config))
-               (:emacsclient (config)))
-      (info "Starting Emacs Server")
-      (emacs-start))
     
     (cond build (log-time-elapsed "Build took " (create))
           watch (do (watch-and-rebuild)
@@ -405,9 +400,4 @@
           rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
                   (deploy-rsync rsync out-dir host user deploy-dir))
           :default (println "Use --help for options.")))
-  
-  (when (and (:emacs (config))
-             (:emacsclient (config)))
-    (info "Stopping Emacs Server")
-    (emacs-stop))
   (shutdown-agents))

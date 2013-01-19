@@ -137,8 +137,7 @@ org alias test"))
  :encoding \"UTF-8\"
  :posts-per-page 2
  :blog-as-index true
- :emacsclient \"/Applications/Emacs.app/Contents/MacOS/bin/emacsclient\"
- :emacs \"/Applications/Emacs.app/Contents/MacOS/Emacs\"]"))
+ :emacs \"/usr/bin/emacs\"]"))
 
 (defn create-dummy-fs []
   (create-resources)

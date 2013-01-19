@@ -32,51 +32,22 @@
         (split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata) (delay content)]))
 
-(defn emacs-start []
-  (.exec (Runtime/getRuntime)
-         (into-array [(:emacs (config))
-                      "-q"
-                      "-daemon"
-                      "-eval"
-                      (str   
-                       "(progn
-                         (setq server-name \"staticEmacsServer\")
-                       " (apply str (map second (:emacs-eval (config)))) ")")])))
-
-;;(emacs-start)
-
-(defn emacs-stop []
-  (sh (:emacsclient (config))
-      "-s"
-      "staticEmacsServer"
-      "-eval"
-      "(progn (setq kill-emacs-hook 'nil) (kill-emacs))"))
-
-;;(emacs-stop)
-
-(let [process (Object.)]
-  (defn- read-org [file]
-    (if (or (not (:emacs (config)))
-            (not (:emacsclient (config))))
-      (do (error "Path to Emacs and Emacs Client are required for org files.")
-          (System/exit 0)))
-    (locking process
-      (let [metadata (prepare-metadata
-                      (apply str
-                             (take 500 (slurp file :encoding (:encoding (config))))))
-            content (delay
-                     (->> (sh (:emacsclient (config))
-                              "-s"
-                              "staticEmacsServer"
-                              "-n"
-                              "-eval"
-                              (str
-                               "(progn "
-                               " (find-file \"" (.getAbsolutePath file) "\") "
-                               " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))
-                          :out
-                          read-string))]
-        [metadata content]))))
+(defn- read-org [file]
+  (if (not (:emacs (config)))
+    (do (error "Path to Emacs is required for org files.")
+        (System/exit 0)))
+  (let [metadata (prepare-metadata
+                  (apply str
+                         (take 500 (slurp file :encoding (:encoding (config))))))
+        content (delay
+                 (:out (sh (:emacs (config))
+                           "-batch" "-eval"
+                           (str
+                            "(progn "
+                            (apply str (map second (:emacs-eval (config))))
+                            " (find-file \"" (.getAbsolutePath file) "\") "
+                            " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))))]
+    [metadata content]))
 
 (defn- read-clj [file]
   (let [[metadata content] (read-string

@@ -46,7 +46,8 @@
                             "(progn "
                             (apply str (map second (:emacs-eval (config))))
                             " (find-file \"" (.getAbsolutePath file) "\") "
-                            " (princ (org-no-properties (org-export-as-html nil nil nil 'string t nil))))"))))]
+                            (:org-export-command (config))
+                            ")"))))]
     [metadata content]))
 
 (defn- read-clj [file]

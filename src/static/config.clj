@@ -13,7 +13,8 @@
                 :encoding "UTF-8"
                 :posts-per-page 2
                 :blog-as-index true
-                :create-archives true}]
+                :create-archives true
+                :org-export-command '(princ (org-no-properties (org-export-as-html nil nil nil 'string t nil)))}]
   
   (def config
     (memoize

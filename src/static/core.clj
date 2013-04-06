@@ -94,7 +94,7 @@
     [:item 
      [:title (escape-html (:title metadata))]
      [:link  (str (URL. (URL. (:site-url (config))) (post-url file)))]
-     [:description @content]]))
+     [:description (escape-html @content)]]))
 
 (defn create-rss 
   "Create RSS feed."

@@ -384,20 +384,29 @@
 
     (setup-logging)
 
-    (when tmp
-      (config) ;;load config
-      (let [loc (FilenameUtils/normalize
-                 (str (System/getProperty "java.io.tmpdir") "/" "static/"))]
-        (set!-config :out-dir loc)
-        (info (str "Using tmp location: " (:out-dir (config))))))
-    
-    (cond build (log-time-elapsed "Build took " (create))
-          watch (do (watch-and-rebuild)
-                    (future (run-jetty serve-static {:port 8080}))
-                    (browse-url "http://127.0.0.1:8080"))
-          jetty (do (future (run-jetty serve-static {:port 8080}))
-                    (browse-url "http://127.0.0.1:8080"))
-          rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
-                  (deploy-rsync rsync out-dir host user deploy-dir))
-          :default (println "Use --help for options.")))
+    (let [out-dir (:out-dir (config))
+          tmp-dir (str (System/getProperty "java.io.tmpdir") "/" "static/")]
+      
+      (when (or tmp
+                (and (:atomic-build (config))
+                     build))
+        (let [loc (FilenameUtils/normalize tmp-dir)]
+          (set!-config :out-dir loc)
+          (info (str "Using tmp location: " (:out-dir (config))))))
+      
+      (cond build (log-time-elapsed "Build took " (create))
+            watch (do (watch-and-rebuild)
+                      (future (run-jetty serve-static {:port 8080}))
+                      (browse-url "http://127.0.0.1:8080"))
+            jetty (do (future (run-jetty serve-static {:port 8080}))
+                      (browse-url "http://127.0.0.1:8080"))
+            rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config)]
+                    (deploy-rsync rsync out-dir host user deploy-dir))
+            :default (println "Use --help for options."))
+      
+      (when (and (:atomic-build (config))
+                 build)
+        (FileUtils/deleteDirectory (File. out-dir))
+        (FileUtils/moveDirectory (File. tmp-dir) (File. out-dir)))))
+  
   (shutdown-agents))

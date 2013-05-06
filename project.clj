@@ -5,7 +5,7 @@
                  [org.clojure/tools.logging "0.2.3"]
                  [cssgen "0.3.0-SNAPSHOT"]
                  [hiccup "0.3.8"]
-                 [org.pegdown/pegdown "1.1.0"]
+                 [org.pegdown/pegdown "1.2.1"]
                  [org.clojars.amit/commons-io "1.4.0"]
                  [ring/ring-core "1.0.2"]
                  [ring/ring-jetty-adapter "1.0.2"]

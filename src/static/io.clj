@@ -25,7 +25,7 @@
   (let [[metadata content]
         (split-file (slurp file :encoding (:encoding (config))))]
     [(prepare-metadata metadata)
-     (delay (.markdownToHtml (PegDownProcessor. org.pegdown.Extensions/ALL) content))]))
+     (delay (.markdownToHtml (PegDownProcessor. org.pegdown.Extensions/TABLES) content))]))
 
 (defn- read-html [file]
   (let [[metadata content]

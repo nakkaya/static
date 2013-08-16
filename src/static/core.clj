@@ -6,7 +6,8 @@
         [ring.adapter.jetty]
         [ring.middleware.file]
         [ring.util.response]
-        [hiccup core page-helpers])
+        [hiccup core page-helpers]
+        [stringtemplate-clj core])
 
   (:use static.config :reload-all)
   (:use static.io :reload-all)
@@ -60,12 +61,20 @@
         template (if (:template m)
                    (:template m) 
                    (:default-template (static.config/config)))
-        template-string (if (= template :none)
-                          c
-                          (read-template template))]
-    (binding [*ns* (the-ns 'static.core)
-              metadata m content c]
-      (apply str (map #(html (eval %)) template-string)))))
+        [type template-string] (if (= template :none)
+                                 [:none c]
+                                 (read-template template))]
+    (cond (or (= type :clj)
+              (= type :none))
+          (binding [*ns* (the-ns 'static.core)
+                    metadata m content c]
+            (apply str (map #(html (eval %)) template-string)))
+          (= type :html)
+          (let [m (->> m
+                       (reduce (fn[h [k v]]
+                                 (assoc h (name k) v)) {}))]
+            (render-template template-string
+                             (merge m {"content" c}))))))
 
 (defn process-site 
   "Process site pages."

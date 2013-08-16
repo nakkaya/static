@@ -9,7 +9,8 @@
                  [org.clojars.amit/commons-io "1.4.0"]
                  [ring/ring-core "1.0.2"]
                  [ring/ring-jetty-adapter "1.0.2"]
-                 [watchtower "0.1.0"]]
+                 [watchtower "0.1.0"]
+                 [stringtemplate-clj "0.1.0"]]
   :main static.core
   :jar-name "static.jar"
   :uberjar-name "static-app.jar")

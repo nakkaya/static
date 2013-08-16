@@ -10,6 +10,7 @@
   (FileUtils/deleteDirectory f))
 
 (defn dummy-fs-fixture [f]
+  (setup-logging)
   (create-dummy-fs)
   (create)
   (f)
@@ -48,6 +49,14 @@
   (is (.exists (File. "html/first-alias/index.html")))
   (is (.exists (File. "html/a/b/c/alias/index.html")))
   (is (.exists (File. "html/second-alias/index.html"))))
+
+(deftest test-st-template
+  (let [file (File. "html/html_template.html")
+	content (slurp file)]
+    (is (= "Dummy Html Post Template"
+    	   (re-find #"Dummy Html Post Template" content)))
+    (is (= "<title>Html Template Test</title>"
+    	   (re-find #"<title>Html Template Test</title>" content)))))
 
 (deftest test-rss-feed
   (let [rss (File. "html/rss-feed")

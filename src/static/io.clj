@@ -2,7 +2,8 @@
   (:use [clojure.tools logging]
         [clojure.java.shell :only [sh]]
         [cssgen]
-        [hiccup core])
+        [hiccup core]
+        [stringtemplate-clj core])
   (:use static.config :reload-all)
   (:import (org.pegdown PegDownProcessor)
            (java.io File)
@@ -92,12 +93,18 @@
                                            "html"]) true)) [] )))
 
 (def read-template
-     (memoize
-      (fn [template]
-        (-> (str (dir-path :templates) template)
-            (File.)
-            (#(str \( (slurp % :encoding (:encoding (config))) \) ))
-            read-string))))
+  (memoize
+   (fn [template]
+     (let [extension (FilenameUtils/getExtension (str template))]
+       (cond (= extension "clj")
+             [:clj
+              (-> (str (dir-path :templates) template)
+                  (File.)
+                  (#(str \( (slurp % :encoding (:encoding (config))) \) ))
+                  read-string)]
+             :default
+             [:html
+              (load-template (dir-path :templates) template)])))))
 
 (defn write-out-dir [file str]
   (FileUtils/writeStringToFile

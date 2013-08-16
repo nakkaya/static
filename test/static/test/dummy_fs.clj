@@ -19,11 +19,20 @@ tags: unit test
 Some dummy file for unit testing.")
 
   (spit (File. "resources/site/style.cssgen")
-  "[[:body :font-size :1em]]")
+        "[[:body :font-size :1em]]")
   
-(spit (File. "resources/site/dummy_clj.clj")
+  (spit (File. "resources/site/dummy_clj.clj")
 	"{:title \"Dummy Clj File\"}
-[:h3 \"Dummy Clj Content\"]"))
+[:h3 \"Dummy Clj Content\"]")
+
+(spit 
+ (File. "resources/site/html_template.markdown")
+ "---
+TITLE: Html Template Test
+TEMPLATE: temp
+---
+
+Dummy Html Post Template"))
 
 (defn- create-dummy-posts []
   (spit 
@@ -120,7 +129,9 @@ Sum 1 and 2
 org alias test"))
 
 (defn- create-template []
-  (spit (File. "resources/templates/temp.clj") "content"))
+  (spit (File. "resources/templates/temp.clj") "content")
+  (spit (File. "resources/templates/temp.st")
+        "<html><title>$title$</title><body>$content$</body></html>"))
 
 (defn- create-static-file []
   (spit (File. "resources/public/dummy.static") "Hello, World!!"))

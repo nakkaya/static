@@ -52,9 +52,13 @@
     [metadata content]))
 
 (defn- read-clj [file]
-  (let [[metadata content] (read-string
+  (let [[metadata & content] (read-string
                               (str \( (slurp file :encoding (:encoding (config))) \)))]
-    [metadata (delay (binding [*ns* (the-ns 'static.core)] (-> content eval html)))]))
+    [metadata (delay (binding [*ns* (the-ns 'static.core)]
+                       (->> content 
+                            (map eval)
+                            last 
+                            html)))]))
 
 (defn- read-cssgen [file]
   (let [metadata {:extension "css" :template :none}

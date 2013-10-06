@@ -6,7 +6,7 @@
         [ring.adapter.jetty]
         [ring.middleware.file]
         [ring.util.response]
-        [hiccup core page-helpers]
+        [hiccup core util page]
         [stringtemplate-clj core])
 
   (:use static.config :reload-all)

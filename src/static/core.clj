@@ -419,6 +419,7 @@
       (when (and (:atomic-build (config))
                  build)
         (FileUtils/deleteDirectory (File. out-dir))
-        (FileUtils/moveDirectory (File. tmp-dir) (File. out-dir)))))
+        (FileUtils/moveDirectory (File. tmp-dir) (File. out-dir))))
   
-  (shutdown-agents))
+    (when-not watch
+      (shutdown-agents))))

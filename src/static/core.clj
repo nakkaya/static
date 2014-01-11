@@ -192,7 +192,7 @@
                [:a {:href (str "/latest-posts/" (+ page 1) "/")} 
                 "Newer Entries &raquo;"]]]
     (cond
-     (< count-total posts-per-page) nil
+     (<= count-total posts-per-page) nil
      (= page max-index) (list older)
      (= page 0) (list newer)
      :default (list older newer))))

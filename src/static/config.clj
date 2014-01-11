@@ -8,6 +8,7 @@
                 :site-url "https://github.com/nakkaya/static"
                 :in-dir "resources/"
                 :out-dir "html/"
+                :post-out-subdir ""
                 :default-template "default.clj"
                 :default-extension "html"
                 :encoding "UTF-8"

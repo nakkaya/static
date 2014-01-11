@@ -371,12 +371,12 @@
 (defn watch-and-rebuild
   "Watch for changes and rebuild site on change."
   []
-  (memo-clear! read-template)
   (watcher/watcher [(:in-dir (config))]
                    (watcher/rate 1000)
                    (watcher/on-change (fn [_]
                                         (info "Rebuilding site...")
                                         (try
+                                          (memo-clear! read-template)
                                           (create)
                                           (catch Exception e
                                             (warn (str "Exception thrown while building site! " e))))))))

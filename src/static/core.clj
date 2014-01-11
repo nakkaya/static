@@ -7,7 +7,8 @@
         [ring.middleware.file]
         [ring.util.response]
         [hiccup core util page]
-        [stringtemplate-clj core])
+        [stringtemplate-clj core]
+        [clojure.core.memoize :only [memo-clear!]])
 
   (:use static.config :reload-all)
   (:use static.io :reload-all)
@@ -370,6 +371,7 @@
 (defn watch-and-rebuild
   "Watch for changes and rebuild site on change."
   []
+  (memo-clear! read-template)
   (watcher/watcher [(:in-dir (config))]
                    (watcher/rate 1000)
                    (watcher/on-change (fn [_]

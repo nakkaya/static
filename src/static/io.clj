@@ -3,7 +3,8 @@
         [clojure.java.shell :only [sh]]
         [cssgen]
         [hiccup core]
-        [stringtemplate-clj core])
+        [stringtemplate-clj core]
+        [clojure.core.memoize :only [memo]])
   (:use static.config :reload-all)
   (:import (org.pegdown PegDownProcessor)
            (java.io File)
@@ -97,7 +98,7 @@
                                            "html"]) true)) [] )))
 
 (def read-template
-  (memoize
+  (memo
    (fn [template]
      (let [extension (FilenameUtils/getExtension (str template))]
        (cond (= extension "clj")

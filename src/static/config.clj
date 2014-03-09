@@ -15,7 +15,10 @@
                 :posts-per-page 2
                 :blog-as-index true
                 :create-archives true
-                :org-export-command '(princ (org-no-properties (org-export-as-html nil nil nil 'string t nil)))}]
+                :org-export-command '(progn 
+                                      (org-html-export-as-html nil nil nil t nil)
+                                      (with-current-buffer "*Org HTML Export*"
+                                        (princ (org-no-properties (buffer-string)))))}]
   
   (def config
     (memoize

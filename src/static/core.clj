@@ -51,6 +51,7 @@
 
 (defn site-url [f & [ext]]
   (-> (str f)
+      (.replaceAll "\\\\" "/")
       (.replaceAll (dir-path :site) "")
       (FilenameUtils/removeExtension)
       (str "."

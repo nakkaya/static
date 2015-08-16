@@ -4,7 +4,6 @@
             [cssgen :as cssgen]
             [hiccup.core :refer :all]
             [stringtemplate-clj.core :as string-template]
-            [clojure.pprint :refer :all]
             [clojure.core.memoize :refer [memo]]
             [static.config :as config])
   (:import (org.pegdown PegDownProcessor)

@@ -1,8 +1,8 @@
 (ns static.test.core
-  (:use [static.core] :reload)
-  (:use [static.io] :reload)
-  (:use [static.test.dummy-fs] :reload)
-  (:use [clojure.test])
+  (:require [static.core :refer :all]
+            [static.io :refer :all]
+            [static.test.dummy-fs :refer :all]
+            [clojure.test :refer :all])
   (:import (java.io File)
            (org.apache.commons.io FileUtils)))
 

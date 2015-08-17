@@ -66,7 +66,7 @@
   (let [[m c] page
         template (if (:template m)
                    (:template m)
-                   (:default-template (static.config/config)))
+                   (:default-template (config/config)))
         [type template-string] (if (= template :none)
                                  [:none c]
                                  (io/read-template template))]

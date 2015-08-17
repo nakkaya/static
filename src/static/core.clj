@@ -1,22 +1,22 @@
 (ns static.core
-  (:gen-class)
-  (:require [watchtower.core :as watcher]
-            [clojure.core.memoize :refer [memo-clear!]]
-            [clojure.tools.logging :as log]
-            [clojure.tools.cli :as cli]
+  (:require [clojure.core.memoize :refer [memo-clear!]]
             [clojure.java.browse :as browse]
-            [ring.adapter.jetty :as jetty]
-            [ring.util.response :refer :all]
+            [clojure.tools.cli :as cli]
+            [clojure.tools.logging :as log]
+            [hiccup.core :as hiccup]
             [hiccup.page :refer :all]
             [hiccup.util :refer :all]
-            [hiccup.core :as hiccup]
-            [stringtemplate-clj.core :as string-template]
+            [ring.adapter.jetty :as jetty]
+            [ring.util.response :refer :all]
             [static.config :as config]
-            [static.io :as io])
+            [static.io :as io]
+            [stringtemplate-clj.core :as string-template]
+            [watchtower.core :as watcher])
   (:import (java.io File)
            (java.net URL)
-           (org.apache.commons.io FileUtils FilenameUtils)
-           (java.text SimpleDateFormat)))
+           (java.text SimpleDateFormat)
+           (org.apache.commons.io FileUtils FilenameUtils))
+  (:gen-class))
 
 (defn setup-logging []
   (let [logger (java.util.logging.Logger/getLogger "")]

@@ -1,6 +1,7 @@
 (ns static.core
   (:require [clojure.core.memoize :refer [memo-clear!]]
             [clojure.java.browse :as browse]
+            [clojure.string :as str]
             [clojure.tools.cli :as cli]
             [clojure.tools.logging :as log]
             [hiccup.core :as hiccup]
@@ -390,20 +391,25 @@
                         (catch Exception e
                           (log/error (str "Exception thrown while building site! " e))))))))
 
+(def cli-opts [[nil "--build" "Build Site."]
+               [nil "--tmp" "Use tmp location override :out-dir"]
+               [nil "--jetty" "View Site."]
+               [nil "--watch" "Watch Site and Rebuild on Change."]
+               [nil "--rsync" "Deploy Site."]
+               [nil "--help" "Show help"]])
+
 (defn -main [& args]
-  (let [[opts _ banner]
-        (cli/cli args ;; TODO: cli/cli is deprecated
-                 ["--build" "Build Site." :default false :flag true]
-                 ["--tmp" "Use tmp location override :out-dir" :default false :flag true]
-                 ["--jetty" "View Site." :default false :flag true]
-                 ["--watch" "Watch Site and Rebuild on Change." :default false :flag true]
-                 ["--rsync" "Deploy Site." :default false :flag true]
-                 ["--help" "Show help" :default false :flag true])
-        {:keys [build tmp jetty watch rsync help]} opts]
+  (let [{:keys [options summary errors]} (cli/parse-opts args cli-opts)
+        {:keys [build tmp jetty watch rsync help]} options]
+
+    (when errors
+      (println (str/join "\n" errors))
+      (System/exit 1))
 
     (when help
-      (println "Static")
-      (println banner)
+      (println "Static: a static blog generator.\n")
+      (println "Usage: static <option>:")
+      (println summary)
       (System/exit 0))
 
     (setup-logging)

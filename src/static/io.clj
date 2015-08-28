@@ -105,7 +105,9 @@
              [:clj
               (-> (str (dir-path :templates) template)
                   (File.)
-                  (#(str \( (slurp % :encoding (:encoding (config/config))) \) ))
+                  (#(str \(
+                         (slurp % :encoding (:encoding (config/config)))
+                         \)))
                   read-string)]
              :default
              [:html

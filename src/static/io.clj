@@ -34,7 +34,7 @@
         (split-file (slurp file :encoding (:encoding (config/config))))]
     [(prepare-metadata metadata) (delay content)]))
 
-(defn- read-org [file]
+(defn read-org [file]
   (if (not (:emacs (config/config)))
     (do (log/error "Path to Emacs is required for org files.")
         (System/exit 0)))
@@ -56,9 +56,9 @@
   (let [[metadata & content] (read-string
                               (str \( (slurp file :encoding (:encoding (config/config))) \)))]
     [metadata (delay (binding [*ns* (the-ns 'static.core)]
-                       (->> content 
+                       (->> content
                             (map eval)
-                            last 
+                            last
                             html)))]))
 
 (defn- read-cssgen [file]

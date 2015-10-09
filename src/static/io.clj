@@ -1,15 +1,14 @@
 (ns static.io
-  (:use [clojure.tools logging]
-        [clojure.java.shell :only [sh]]
-        [cssgen]
-        [hiccup core]
-        [stringtemplate-clj core]
-        [clojure.core.memoize :only [memo]])
-  (:use static.config :reload-all)
-  (:import (org.pegdown PegDownProcessor)
-           (java.io File)
-           (java.io InputStreamReader OutputStreamWriter)
-           (org.apache.commons.io FileUtils FilenameUtils)))
+  (:require [clojure.core.memoize :refer [memo]]
+            [clojure.java.shell :as sh]
+            [clojure.tools.logging :as log]
+            [cssgen :as css-gen]
+            [hiccup.core :as hiccup]
+            [static.config :as config]
+            [stringtemplate-clj.core :as string-template])
+  (:import (java.io File)
+           (org.apache.commons.io FileUtils FilenameUtils)
+           (org.pegdown PegDownProcessor)))
 
 (defn- split-file [content]
   (let [idx (.indexOf content "---" 4)]
@@ -25,47 +24,47 @@
 
 (defn- read-markdown [file]
   (let [[metadata content]
-        (split-file (slurp file :encoding (:encoding (config))))]
+        (split-file (slurp file :encoding (:encoding (config/config))))]
     [(prepare-metadata metadata)
      (delay (.markdownToHtml (PegDownProcessor. org.pegdown.Extensions/TABLES) content))]))
 
 (defn- read-html [file]
   (let [[metadata content]
-        (split-file (slurp file :encoding (:encoding (config))))]
+        (split-file (slurp file :encoding (:encoding (config/config))))]
     [(prepare-metadata metadata) (delay content)]))
 
-(defn- read-org [file]
-  (if (not (:emacs (config)))
-    (do (error "Path to Emacs is required for org files.")
+(defn read-org [file]
+  (if (not (:emacs (config/config)))
+    (do (log/error "Path to Emacs is required for org files.")
         (System/exit 0)))
   (let [metadata (prepare-metadata
                   (apply str
-                         (take 500 (slurp file :encoding (:encoding (config))))))
+                         (take 500 (slurp file :encoding (:encoding (config/config))))))
         content (delay
-                 (:out (sh (:emacs (config))
+                 (:out (sh/sh (:emacs (config/config))
                            "-batch" "-eval"
                            (str
                             "(progn "
-                            (apply str (map second (:emacs-eval (config))))
+                            (apply str (map second (:emacs-eval (config/config))))
                             " (find-file \"" (.getAbsolutePath file) "\") "
-                            (:org-export-command (config))
+                            (:org-export-command (config/config))
                             ")"))))]
     [metadata content]))
 
 (defn- read-clj [file]
   (let [[metadata & content] (read-string
-                              (str \( (slurp file :encoding (:encoding (config))) \)))]
+                              (str \( (slurp file :encoding (:encoding (config/config))) \)))]
     [metadata (delay (binding [*ns* (the-ns 'static.core)]
-                       (->> content 
+                       (->> content
                             (map eval)
-                            last 
-                            html)))]))
+                            last
+                            hiccup/html)))]))
 
 (defn- read-cssgen [file]
   (let [metadata {:extension "css" :template :none}
         content (read-string
-                 (slurp file :encoding (:encoding (config))))
-        to-css  #(clojure.string/join "\n" (doall (map css %)))]
+                 (slurp file :encoding (:encoding (config/config))))
+        to-css  #(clojure.string/join "\n" (doall (map css-gen/css %)))]
     [metadata (delay (binding [*ns* (the-ns 'static.core)] (-> content eval to-css)))]))
 
 (defn read-doc [f]
@@ -80,10 +79,10 @@
           :default (throw (Exception. "Unknown Extension.")))))
 
 (defn dir-path [dir]
-  (cond (= dir :templates) (str (:in-dir (config)) "templates/")
-        (= dir :public) (str (:in-dir (config)) "public/")
-        (= dir :site) (str (:in-dir (config)) "site/")
-        (= dir :posts) (str (:in-dir (config)) "posts/")
+  (cond (= dir :templates) (str (:in-dir (config/config)) "templates/")
+        (= dir :public) (str (:in-dir (config/config)) "public/")
+        (= dir :site) (str (:in-dir (config/config)) "site/")
+        (= dir :posts) (str (:in-dir (config/config)) "posts/")
         :default (throw (Exception. "Unknown Directory."))))
 
 (defn list-files [d]
@@ -105,17 +104,19 @@
              [:clj
               (-> (str (dir-path :templates) template)
                   (File.)
-                  (#(str \( (slurp % :encoding (:encoding (config))) \) ))
+                  (#(str \(
+                         (slurp % :encoding (:encoding (config/config)))
+                         \)))
                   read-string)]
              :default
              [:html
-              (load-template (dir-path :templates) template)])))))
+              (string-template/load-template (dir-path :templates) template)])))))
 
 (defn write-out-dir [file str]
   (FileUtils/writeStringToFile
-   (File. (:out-dir (config)) file) str (:encoding (config))))
+   (File. (:out-dir (config/config)) file) str (:encoding (config/config))))
 
 (defn deploy-rsync [rsync out-dir host user deploy-dir]
   (let [cmd [rsync "-avz" "--delete" "--checksum" "-e" "ssh"
              out-dir (str user "@" host ":" deploy-dir)]]
-    (info (:out (apply sh cmd)))))
+    (log/info (:out (apply sh/sh cmd)))))

@@ -359,14 +359,16 @@
 
     (when (:blog-as-index (config/config))
       (log-time-elapsed "Creating Latest Posts " (create-latest-posts))
-      (let [max (apply max (map read-string (-> (:out-dir (config/config))
-                                                (str  "latest-posts/")
-                                                (File.)
-                                                .list)))]
-        (FileUtils/copyFile
-         (File. (str (:out-dir (config/config))
-                     "latest-posts/" max "/index.html"))
-         (File. (str (:out-dir (config/config)) "index.html")))))))
+      (let [out-dir (:out-dir (config/config))
+            latest-posts-path (str out-dir "latest-posts/")]
+        (if-let [dir (.list (File. latest-posts-path))]
+          (let [max (apply max (map read-string dir))]
+            (FileUtils/copyFile
+             (File. (str latest-posts-path max "/index.html"))
+             (File. (str out-dir "index.html"))))
+          (log/warn (str  "\"" latest-posts-path "\""
+                          " is not a valid directory."
+                          " Ensure :out-dir ends with a trailing slash.")))))))
 
 (defn serve-static [req]
   (let [mime-types {".clj" "text/plain"

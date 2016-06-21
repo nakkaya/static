@@ -13,5 +13,6 @@
                  [stringtemplate-clj "0.1.0"]
                  [org.clojure/core.memoize "0.5.6"]]
   :main static.core
+  :aot [static.core]
   :jar-name "static.jar"
   :uberjar-name "static-app.jar")

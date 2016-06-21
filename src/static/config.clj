@@ -11,6 +11,7 @@
                 :post-out-subdir ""
                 :default-template "default.clj"
                 :default-extension "html"
+                :tags-template "tags.clj"
                 :encoding "UTF-8"
                 :posts-per-page 2
                 :blog-as-index true

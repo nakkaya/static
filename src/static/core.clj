@@ -173,16 +173,22 @@
   (io/write-out-dir "tags/index.html"
                     (template
                      [{:title "Tags" :template (:default-template (config/config))}
-                      (hiccup/html
-                       [:h2 "Tags"]
-                       (map (fn[t]
-                              (let [[tag posts] t]
-                                [:h4 [:a {:name tag} tag]
-                                 [:ul
-                                  (map #(let [[url title] %]
-                                          [:li [:a {:href url} title]])
-                                       posts)]]))
-                            (tag-map)))])))
+                      (let [template-path (str (:in-dir (config/config))
+                                               "templates/"
+                                               (:tags-template (config/config)))]
+                        (hiccup/html (if (.isFile (File. template-path))
+                                       @(second (io/read-doc template-path))
+                                       [:div
+                                        [:h2 "Tags"]
+                                        (map
+                                         (fn[t]
+                                           (let [[tag posts] t]
+                                             [:h4
+                                              [:a {:name tag} tag]
+                                              [:ul (map #(let [[url title] %]
+                                                           [:li [:a {:href url} title]])
+                                                        posts)]]))
+                                         (tag-map))])))])))
 
 ;;
 ;; Create pages for latest posts.

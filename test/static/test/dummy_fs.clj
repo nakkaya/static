@@ -147,8 +147,7 @@ org alias test"))
  :default-template \"temp.clj\"
  :encoding \"UTF-8\"
  :posts-per-page 2
- :blog-as-index true
- :emacs \"/usr/bin/emacs\"]"))
+ :blog-as-index true]"))
 
 (defn create-dummy-fs []
   (create-resources)

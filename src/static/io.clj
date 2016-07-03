@@ -34,14 +34,11 @@
     [(prepare-metadata metadata) (delay content)]))
 
 (defn read-org [file]
-  (if (not (:emacs (config/config)))
-    (do (log/error "Path to Emacs is required for org files.")
-        (System/exit 0)))
   (let [metadata (prepare-metadata
                   (apply str
                          (take 500 (slurp file :encoding (:encoding (config/config))))))
         content (delay
-                 (:out (sh/sh (:emacs (config/config))
+                 (:out (sh/sh "emacs"
                            "-batch" "-eval"
                            (str
                             "(progn "

@@ -17,9 +17,10 @@
 (defn- prepare-metadata [metadata]
   (reduce (fn [h [_ k v]]
             (let [key (keyword (.toLowerCase k))]
-              (if (not (h key))
-                (assoc h key v)
-                h)))
+              (cond
+                (= :link key) (assoc h :links (conj (into [] (:links h)) v))
+                (not (h key)) (assoc h key v)
+                :else h)))
           {} (re-seq #"([^:#\+]+): (.+)(\n|$)" metadata)))
 
 (defn- read-markdown [file]

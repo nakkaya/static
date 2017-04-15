@@ -33,10 +33,11 @@
     (is (= "font-size: 1em;" (re-find #"font-size: 1em;" @content)))))
 
 (deftest test-org
-  (let [[metadata content] (read-doc (File. "resources/posts/2050-07-07-dummy-future-post-7.org"))] 
+  (let [[metadata content] (read-doc (File. "resources/posts/2050-07-07-dummy-future-post-7.org"))]
     (is (= "org-mode org-babel"  (:tags metadata)))
     (is (= "Dummy org-mode post" (:title metadata)))
-    (is (= "Sum 1 and 2" (re-find #"Sum 1 and 2" @content)))))
+    (is (= "Sum 1 and 2" (re-find #"Sum 1 and 2" @content)))
+    (is (= 2 (count (:links metadata))))))
 
 (deftest test-clj
   (let [[metadata content] (read-doc (File. "resources/site/dummy_clj.clj"))]

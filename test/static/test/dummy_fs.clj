@@ -108,6 +108,8 @@ CATEGORY: test
    "#+title: Dummy org-mode post
 #+tags: org-mode org-babel
 #+template: temp.clj
+#+link: first http://example.org
+$+link: clojure http://clojure.org
 
 Sum 1 and 2
 
@@ -133,6 +135,26 @@ org alias test"))
   (spit (File. "resources/templates/temp.st")
         "<html><title>$title$</title><body>$content$</body></html>"))
 
+(defn- create-default-template []
+  (spit (File. "resources/templates/default.clj")
+        "
+(let
+    [config (static.config/config)
+     path-to #(str (:url-base (static.config/config)) %)
+     post? (= (:type metadata) :post)]
+
+  (html5
+   [:head
+    [:meta {:name \"description\", :content (if post?
+                                            (:description metadata)
+                                            (:site-description config))}]
+    [:meta {:name \"keywords\", :content (if post?
+                                         (:tags metadata)
+                                         (:site-keywords config))}]
+    [:meta {:name \"author\", :content (:author-name config)}]
+    [:title (:site-title config)]]
+   [:body]))"))
+
 (defn- create-static-file []
   (spit (File. "resources/public/dummy.static") "Hello, World!!"))
 
@@ -147,8 +169,7 @@ org alias test"))
  :default-template \"temp.clj\"
  :encoding \"UTF-8\"
  :posts-per-page 2
- :blog-as-index true
- :emacs \"/usr/bin/emacs\"]"))
+ :blog-as-index true]"))
 
 (defn create-dummy-fs []
   (create-resources)
@@ -156,4 +177,5 @@ org alias test"))
   (create-static-file)
   (create-dummy-posts)
   (create-template)
+  (create-default-template)
   (create-config))

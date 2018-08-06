@@ -39,7 +39,7 @@
                   (apply str
                          (take 500 (slurp file :encoding (:encoding (config/config))))))
         content (delay
-                 (:out (sh/sh "emacs"
+                 (:out (sh/sh (:emacs (config/config))
                            "-batch" "-eval"
                            (str
                             "(progn "

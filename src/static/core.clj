@@ -434,10 +434,10 @@
 
       (cond build (log-time-elapsed "Build took " (create))
             watch (do (watch-and-rebuild)
-                      (future (jetty/run-jetty serve-static {:port 8080}))
-                      (browse/browse-url "http://127.0.0.1:8080"))
-            jetty (do (future (jetty/run-jetty serve-static {:port 8080}))
-                      (browse/browse-url "http://127.0.0.1:8080"))
+                      (future (jetty/run-jetty serve-static {:port 5000}))
+                      (browse/browse-url "http://127.0.0.1:5000"))
+            jetty (do (future (jetty/run-jetty serve-static {:port 5000}))
+                      (browse/browse-url "http://127.0.0.1:5000"))
             rsync (let [{:keys [rsync out-dir host user deploy-dir]} (config/config)]
                     (io/deploy-rsync rsync out-dir host user deploy-dir))
             :default (println "Use --help for options."))

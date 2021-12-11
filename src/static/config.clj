@@ -16,6 +16,7 @@
                 :posts-per-page 2
                 :blog-as-index true
                 :create-archives true
+                :emacs "emacs"
                 :org-export-command '(progn
                                       (org-html-export-as-html nil nil nil t nil)
                                       (with-current-buffer "*Org HTML Export*"
